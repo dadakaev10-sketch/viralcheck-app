@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
 const CATEGORIES = [
@@ -57,6 +57,49 @@ function CopyButton({ text, copyKey, copiedKey, copy, full = false }) {
     >
       {copied ? '✓ Kopiert!' : '⎘ Kopieren'}
     </button>
+  );
+}
+
+// ─── PWA Install Banner ───────────────────────────────
+function PWAInstallBanner({ onInstall, onDismiss }) {
+  return (
+    <div className="fixed bottom-4 left-4 right-4 z-50 flex justify-center pointer-events-none">
+      <div
+        className="w-full max-w-sm bg-white border border-[#e8e5f0] rounded-2xl shadow-2xl p-4 flex items-center gap-3 pointer-events-auto fade-up"
+        style={{ boxShadow: '0 8px 32px rgba(124,58,237,0.18)' }}
+      >
+        {/* App icon */}
+        <div
+          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)' }}
+        >
+          ✨
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-extrabold text-[#0f0e17] leading-tight">App installieren</div>
+          <div className="text-xs text-[#6b6884] mt-0.5">Zum Homescreen hinzufügen</div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+          <button
+            onClick={onInstall}
+            className="px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)' }}
+          >
+            Installieren
+          </button>
+          <button
+            onClick={onDismiss}
+            className="text-[11px] font-medium text-[#a09db8] hover:text-[#6b6884] transition-colors"
+          >
+            Nicht jetzt
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -305,6 +348,47 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  // PWA install prompt
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    // Capture the install prompt before the browser shows its own
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBanner(true);
+    };
+
+    // Hide banner if user already installed
+    const handleAppInstalled = () => {
+      setShowInstallBanner(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    setShowInstallBanner(false);
+  };
+
+  const handleDismissBanner = () => setShowInstallBanner(false);
+
   const LOADING_STEPS = [
     'Bild erkannt & verarbeitet',
     'Komposition & Bildqualität analysieren…',
@@ -477,6 +561,11 @@ export default function Home() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ── PWA Install Banner ── */}
+      {showInstallBanner && (
+        <PWAInstallBanner onInstall={handleInstall} onDismiss={handleDismissBanner} />
       )}
 
       {/* ── Result State ── */}

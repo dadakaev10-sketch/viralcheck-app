@@ -1,0 +1,31 @@
+{
+  "name": "ViralCheck – KI Social Media Analyzer",
+  "short_name": "ViralCheck",
+  "description": "Analysiere dein Bild auf Viral-Potenzial mit Gemini 2.5 Flash KI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f4f8",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "categories": ["social", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
