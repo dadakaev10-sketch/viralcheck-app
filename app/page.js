@@ -5,6 +5,14 @@ import { translations } from './i18n';
 
 const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
 
+// ─── Safe localStorage helpers (iOS Safari Private Mode throws on access) ──────
+function getLang() {
+  try { return localStorage.getItem('vc-lang'); } catch { return null; }
+}
+function saveLang(l) {
+  try { localStorage.setItem('vc-lang', l); } catch { /* ignore */ }
+}
+
 const LANGS = [
   { code: 'de', flag: '🇩🇪', label: 'DE' },
   { code: 'en', flag: '🇬🇧', label: 'EN' },
@@ -20,7 +28,22 @@ function scoreColor(v) {
 function useCopy() {
   const [copiedKey, setCopiedKey] = useState(null);
   const copy = useCallback((text, key) => {
-    navigator.clipboard.writeText(text).catch(() => {});
+    // navigator.clipboard requires secure context + user gesture; guard for older iOS
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    } else {
+      // Fallback: execCommand (deprecated but works on old iOS Safari)
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch { /* ignore */ }
+    }
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
   }, []);
@@ -346,8 +369,8 @@ export default function Home() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   useEffect(() => {
-    // Restore saved language preference
-    const saved = localStorage.getItem('vc-lang');
+    // Restore saved language preference (safe – won't throw in iOS Private Mode)
+    const saved = getLang();
     if (saved && translations[saved]) setLang(saved);
 
     // Register service worker
@@ -375,7 +398,7 @@ export default function Home() {
 
   const changeLang = (l) => {
     setLang(l);
-    localStorage.setItem('vc-lang', l);
+    saveLang(l);
   };
 
   const handleInstall = async () => {
