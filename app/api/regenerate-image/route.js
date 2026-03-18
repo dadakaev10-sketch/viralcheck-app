@@ -59,7 +59,6 @@ CATEGORY-SPECIFIC ENHANCEMENT (${category}):
 - Atmosphere: ${categoryConfig.atmosphere}
 - Enhancement details: ${categoryConfig.enhancement}
 - Adjust colors, tone, and mood to match the ${category} category
-- If person looks neutral/serious: add a subtle natural smile only
 
 STRICT RULES - DO NOT CHANGE:
 - Keep the same person with identical face, appearance, clothing, and hairstyle
