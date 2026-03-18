@@ -50,6 +50,97 @@ function useCopy() {
   return { copiedKey, copy };
 }
 
+// ─── Before / After Image Comparison Slider ──────────────────────────
+function ImageCompareSlider({ before, after, labelBefore = 'Vorher', labelAfter = 'Nachher' }) {
+  const containerRef = useRef(null);
+  const [pos, setPos] = useState(50);
+  const [containerW, setContainerW] = useState(0);
+  const dragging = useRef(false);
+
+  // Track container width for the before-image sizing
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setContainerW(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const updatePos = useCallback((clientX) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setPos((x / rect.width) * 100);
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragging.current) return;
+      e.preventDefault();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      updatePos(cx);
+    };
+    const onUp = () => { dragging.current = false; };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    };
+  }, [updatePos]);
+
+  const onStart = (e) => {
+    dragging.current = true;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    updatePos(cx);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full select-none overflow-hidden rounded-2xl border border-[#e8e5f0] bg-black cursor-col-resize"
+      style={{ maxHeight: '75vh' }}
+      onMouseDown={onStart}
+      onTouchStart={onStart}
+    >
+      {/* After image (full, sets container height) */}
+      <img src={after} alt="After" draggable={false}
+        className="block w-full h-auto" />
+
+      {/* Before image (clipped from left) */}
+      <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+        <img src={before} alt="Before" draggable={false}
+          className="block h-full"
+          style={{ width: containerW || '100%', maxWidth: 'none', objectFit: 'cover' }} />
+      </div>
+
+      {/* Divider line */}
+      <div className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none"
+        style={{ left: `${pos}%`, transform: 'translateX(-50%)', boxShadow: '0 0 8px rgba(0,0,0,0.4)' }}>
+        {/* Handle */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl border-2 border-violet-500 flex items-center justify-center pointer-events-none">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M5 9L2 9M2 9L4 7M2 9L4 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M13 9L16 9M16 9L14 7M16 9L14 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Labels */}
+      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
+        {labelBefore}
+      </div>
+      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
+        {labelAfter}
+      </div>
+    </div>
+  );
+}
+
 function ScoreBar({ label, value }) {
   const c = scoreColor(value);
   return (
@@ -642,78 +733,78 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mobile: stacked. Desktop: side by side */}
-          <div className="flex flex-col lg:grid lg:grid-cols-[280px_1fr] gap-4 items-start">
-
-            {/* Image card – compact on mobile */}
-            <div className="lg:sticky lg:top-20">
-              <div className="bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
-                <div className="flex lg:block">
-                  {(regeneratedImage || imagePreview) && (
-                    <img src={regeneratedImage || imagePreview} alt={regeneratedImage ? 'Regenerated' : 'Uploaded'}
-                      className="w-28 h-28 sm:w-36 sm:h-36 lg:w-full lg:h-auto lg:aspect-square object-cover flex-shrink-0" />
-                  )}
-                  <div className="p-3 sm:p-4 flex-1 min-w-0">
-                    <div className="flex flex-col gap-1.5 text-xs">
-                      {[
-                        [t.file,     imageFile?.name?.slice(0, 18) + (imageFile?.name?.length > 18 ? '…' : '')],
-                        [t.platform, platform],
-                        [t.category, category],
-                      ].map(([k, v]) => (
-                        <div key={k} className="flex justify-between gap-2">
-                          <span className="text-[#6b6884]">{k}</span>
-                          <span className="font-bold text-[#0f0e17] text-right truncate">{v}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {regeneratedImage && (
-                      <>
-                        <div className="mt-2 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg font-semibold border border-green-200">
-                          ✓ {lang === 'de' ? 'Regeneriert' : lang === 'en' ? 'Regenerated' : 'Перегенерировано'}
-                        </div>
-                        <a href={regeneratedImage} download="viralcheck-regenerated.png"
-                          className="mt-2 w-full py-2 bg-gradient-to-r from-violet-500 to-violet-700 text-white rounded-lg text-xs font-bold text-center block hover:from-violet-600 hover:to-violet-800 transition-all active:scale-95">
-                          {lang === 'de' ? 'Bild speichern' : lang === 'en' ? 'Download image' : 'Скачать изображение'}
-                        </a>
-                      </>
-                    )}
+          {/* Image section – before/after slider when regenerated */}
+          {imagePreview && (
+            <div className="mb-4">
+              {regeneratedImage ? (
+                <div className="flex flex-col gap-3">
+                  <ImageCompareSlider
+                    before={imagePreview}
+                    after={regeneratedImage}
+                    labelBefore={lang === 'de' ? 'Vorher' : lang === 'en' ? 'Before' : 'До'}
+                    labelAfter={lang === 'de' ? 'Nachher' : lang === 'en' ? 'After' : 'После'}
+                  />
+                  <div className="flex gap-2">
+                    <a href={regeneratedImage} download="viralcheck-regenerated.png"
+                      className="flex-1 py-2.5 bg-gradient-to-r from-violet-500 to-violet-700 text-white rounded-xl text-xs font-bold text-center hover:from-violet-600 hover:to-violet-800 transition-all active:scale-95">
+                      {lang === 'de' ? 'Neues Bild speichern' : lang === 'en' ? 'Download new image' : 'Скачать новое'}
+                    </a>
                     <button onClick={reset}
-                      className="mt-2.5 w-full py-2 border border-[#e8e5f0] rounded-lg text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
+                      className="px-4 py-2.5 border border-[#e8e5f0] rounded-xl text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
                       {t.reanalyze}
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex flex-col gap-4 w-full">
-              <AnalysisTabs data={result} t={t} />
-
-              {/* Regenerate button */}
-              <button
-                onClick={handleRegenerateImage}
-                disabled={regenerating}
-                className="w-full py-4 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-2xl text-sm font-bold hover:from-green-500 hover:to-green-700 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-2 shadow-md"
-              >
-                {regenerating ? (
-                  <>
-                    <span className="spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
-                    {lang === 'de' ? 'Generiert...' : lang === 'en' ? 'Generating...' : 'Генерирую...'}
-                  </>
-                ) : (
-                  <>
-                    🎨 {lang === 'de' ? 'Bild mit Empfehlungen regenerieren' : lang === 'en' ? 'Regenerate Image with Suggestions' : 'Восстановить изображение с предложениями'}
-                  </>
-                )}
-              </button>
-
-              {error && (
-                <div className="w-full bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 font-medium">
-                  ⚠️ {error}
+              ) : (
+                <div className="bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
+                  <img src={imagePreview} alt="Uploaded"
+                    className="w-full h-auto max-h-[70vh] object-contain" />
+                  <div className="p-3 flex items-center justify-between">
+                    <div className="flex gap-3 text-xs text-[#6b6884]">
+                      <span>{imageFile?.name?.slice(0, 20)}{imageFile?.name?.length > 20 ? '…' : ''}</span>
+                      <span className="font-bold text-[#0f0e17]">{platform} · {category}</span>
+                    </div>
+                    <button onClick={reset}
+                      className="px-3 py-1.5 border border-[#e8e5f0] rounded-lg text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
+                      {t.reanalyze}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
+          )}
+
+          {/* Analysis + Regenerate */}
+          <div className="flex flex-col gap-4 w-full">
+            <AnalysisTabs data={result} t={t} />
+
+            {/* Regenerate button */}
+            <button
+              onClick={handleRegenerateImage}
+              disabled={regenerating}
+              className="w-full py-4 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-2xl text-sm font-bold hover:from-green-500 hover:to-green-700 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-2 shadow-md"
+            >
+              {regenerating ? (
+                <>
+                  <span className="spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
+                  {lang === 'de' ? 'Generiert...' : lang === 'en' ? 'Generating...' : 'Генерирую...'}
+                </>
+              ) : regeneratedImage ? (
+                <>
+                  🎨 {lang === 'de' ? 'Nochmal regenerieren' : lang === 'en' ? 'Regenerate again' : 'Регенерировать снова'}
+                </>
+              ) : (
+                <>
+                  🎨 {lang === 'de' ? 'Bild mit Empfehlungen regenerieren' : lang === 'en' ? 'Regenerate Image with Suggestions' : 'Восстановить изображение с предложениями'}
+                </>
+              )}
+            </button>
+
+            {error && (
+              <div className="w-full bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 font-medium">
+                ⚠️ {error}
+              </div>
+            )}
           </div>
         </div>
       )}
