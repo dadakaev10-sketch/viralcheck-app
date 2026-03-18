@@ -13,16 +13,52 @@ export async function POST(request) {
       return Response.json({ error: 'XAI_API_KEY fehlt in .env.local' }, { status: 500 });
     }
 
-    // Build prompt: keep original image, apply analysis improvements + lighting/contrast
+    // Build category-specific prompt with different lighting, atmosphere, and styling
+    const categoryPrompts = {
+      'Business': {
+        lighting: 'sharp, professional studio lighting with clean shadows',
+        atmosphere: 'corporate, serious, competent, trustworthy',
+        enhancement: 'crisp focus, clean background, formal business attire enhancement, executive presence'
+      },
+      'Luxury': {
+        lighting: 'premium, cinematic lighting with subtle golden hour tones',
+        atmosphere: 'sophisticated, elegant, high-end, premium',
+        enhancement: 'luxurious color grading, soft glow, subtle shadows, premium finish'
+      },
+      'Lifestyle': {
+        lighting: 'soft, natural golden light, warm and inviting',
+        atmosphere: 'relaxed, authentic, approachable, natural',
+        enhancement: 'warm color tones, soft focus elements, natural radiance'
+      },
+      'Travel': {
+        lighting: 'bright, vibrant natural daylight with dynamic shadows',
+        atmosphere: 'adventurous, energetic, vibrant, inspiring',
+        enhancement: 'vibrant colors, clear details, dynamic composition feel'
+      },
+      'Food': {
+        lighting: 'appetizing studio lighting, warm and welcoming',
+        atmosphere: 'delicious, inviting, professional food styling',
+        enhancement: 'food looks fresh and appetizing, warm color balance'
+      },
+      'Fitness': {
+        lighting: 'bright, energetic lighting highlighting muscle definition',
+        atmosphere: 'athletic, confident, strong, determined',
+        enhancement: 'sharp focus, dynamic lighting, enhanced definition'
+      }
+    };
+
+    const categoryConfig = categoryPrompts[category] || categoryPrompts['Lifestyle'];
+
     const enhancementPrompt = `Take this exact image and apply these improvements:
 
 IMPROVEMENTS FROM ANALYSIS:
 ${improvements.map((tip, i) => `${i + 1}. ${tip}`).join('\n')}
 
-ALSO IMPROVE:
-- Professional lighting (softer, more flattering)
-- Contrast and color grading
-- Cleaner, more polished overall look
+CATEGORY-SPECIFIC ENHANCEMENT (${category}):
+- Lighting: ${categoryConfig.lighting}
+- Atmosphere: ${categoryConfig.atmosphere}
+- Enhancement details: ${categoryConfig.enhancement}
+- Adjust colors, tone, and mood to match the ${category} category
 - If person looks neutral/serious: add a subtle natural smile only
 
 STRICT RULES - DO NOT CHANGE:
@@ -32,7 +68,7 @@ STRICT RULES - DO NOT CHANGE:
 - Do NOT add or remove any objects or people
 - Do NOT change the setting or environment
 
-This must look like the SAME photo, just professionally enhanced. Platform: ${platform} | Category: ${category}`;
+This must look like the SAME photo, just professionally enhanced for ${category} content. Platform: ${platform}`;
 
     // Use /v1/images/edits endpoint to edit the original image directly
     const requestBody = {
