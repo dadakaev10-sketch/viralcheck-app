@@ -1,5 +1,3 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
 export const maxDuration = 60;
 
 export async function POST(request) {
@@ -21,19 +19,15 @@ export async function POST(request) {
       return Response.json({ error: 'Kein Bild hochgeladen.' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) {
-      return Response.json({ error: 'GEMINI_API_KEY fehlt in .env.local' }, { status: 500 });
+      return Response.json({ error: 'XAI_API_KEY fehlt in .env.local' }, { status: 500 });
     }
 
     // Convert to base64
     const bytes  = await imageFile.arrayBuffer();
     const base64 = Buffer.from(bytes).toString('base64');
     const mimeType = imageFile.type || 'image/jpeg';
-
-    const genAI     = new GoogleGenerativeAI(apiKey);
-    const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const model     = genAI.getGenerativeModel({ model: modelName });
 
     const prompt = `You are a social media expert analyzing images for viral potential.
 ${langInstruction}
@@ -77,12 +71,34 @@ Required JSON format (all fields mandatory):
   }
 }`;
 
-    const result = await model.generateContent([
-      { text: prompt },
-      { inlineData: { data: base64, mimeType } },
-    ]);
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'grok-4-1-vision-latest',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+            ],
+          },
+        ],
+        temperature: 0,
+      }),
+    });
 
-    const rawText = result.response.text().trim();
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'X.AI API error');
+    }
+
+    const data = await response.json();
+    const rawText = data.choices[0].message.content.trim();
 
     // Strip markdown code fences if model adds them anyway
     const cleaned = rawText

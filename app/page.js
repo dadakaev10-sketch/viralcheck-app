@@ -363,6 +363,8 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regeneratedImage, setRegeneratedImage] = useState(null);
 
   // PWA install prompt
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -445,11 +447,37 @@ export default function Home() {
     }
   };
 
+  const handleRegenerateImage = async () => {
+    if (!result || !result.wasVerbessern) return;
+    setRegenerating(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/regenerate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          improvements: result.wasVerbessern,
+          imageContent: result.imageContent,
+          platform,
+          category,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Regeneration fehlgeschlagen');
+      setRegeneratedImage(data.image);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   const reset = () => {
     setResult(null);
     setImageFile(null);
     setImagePreview(null);
     setError(null);
+    setRegeneratedImage(null);
   };
 
   return (
@@ -620,8 +648,8 @@ export default function Home() {
             <div className="lg:sticky lg:top-20">
               <div className="bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
                 <div className="flex lg:block">
-                  {imagePreview && (
-                    <img src={imagePreview} alt="Uploaded"
+                  {(regeneratedImage || imagePreview) && (
+                    <img src={regeneratedImage || imagePreview} alt={regeneratedImage ? 'Regenerated' : 'Uploaded'}
                       className="w-28 h-28 sm:w-36 sm:h-36 lg:w-full lg:h-auto lg:aspect-square object-cover flex-shrink-0" />
                   )}
                   <div className="p-3 sm:p-4 flex-1 min-w-0">
@@ -637,6 +665,11 @@ export default function Home() {
                         </div>
                       ))}
                     </div>
+                    {regeneratedImage && (
+                      <div className="mt-2 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg font-semibold border border-green-200">
+                        ✓ {lang === 'de' ? 'Regeneriert' : lang === 'en' ? 'Regenerated' : 'Перегенерировано'}
+                      </div>
+                    )}
                     <button onClick={reset}
                       className="mt-2.5 w-full py-2 border border-[#e8e5f0] rounded-lg text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
                       {t.reanalyze}
@@ -647,7 +680,33 @@ export default function Home() {
             </div>
 
             {/* Tabs */}
-            <AnalysisTabs data={result} t={t} />
+            <div className="flex flex-col gap-4 w-full">
+              <AnalysisTabs data={result} t={t} />
+
+              {/* Regenerate button */}
+              <button
+                onClick={handleRegenerateImage}
+                disabled={regenerating}
+                className="w-full py-4 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-2xl text-sm font-bold hover:from-green-500 hover:to-green-700 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-2 shadow-md"
+              >
+                {regenerating ? (
+                  <>
+                    <span className="spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
+                    {lang === 'de' ? 'Generiert...' : lang === 'en' ? 'Generating...' : 'Генерирую...'}
+                  </>
+                ) : (
+                  <>
+                    🎨 {lang === 'de' ? 'Bild mit Empfehlungen regenerieren' : lang === 'en' ? 'Regenerate Image with Suggestions' : 'Восстановить изображение с предложениями'}
+                  </>
+                )}
+              </button>
+
+              {error && (
+                <div className="w-full bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 font-medium">
+                  ⚠️ {error}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
