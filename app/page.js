@@ -703,7 +703,7 @@ export default function Home() {
             ) : (
               <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
                 <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full max-h-64 object-cover" />
+                  <img src={imagePreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
                   <button onClick={() => { setImageFile(null); setImagePreview(null); }}
                     className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
                     ×
