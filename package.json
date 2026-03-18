@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "node scripts/setup.js",
+    "setup:firebase": "node scripts/setup-firebase.js",
+    "setup:vercel": "node scripts/setup-vercel.js"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.4",
