@@ -106,8 +106,8 @@ export const translations = {
     copied: '✓ Kopiert!',
 
     // Auth
-    loginTitle:    'Anmelden um zu starten',
-    loginSub:      'Melde dich an, um deine Bilder zu analysieren.',
+    loginTitle:    'Anmelden & kostenlos testen',
+    loginSub:      'Nach dem Einloggen kannst du 3x gratis testen.',
     loginBtn:      'Mit Google anmelden',
     logout:        'Abmelden',
     remaining:     (n) => `${n} Analyse${n === 1 ? '' : 'n'} übrig`,
@@ -213,8 +213,8 @@ export const translations = {
     copied: '✓ Copied!',
 
     // Auth
-    loginTitle:    'Sign in to get started',
-    loginSub:      'Sign in to analyze your images.',
+    loginTitle:    'Sign in & try for free',
+    loginSub:      'After signing in you get 3 free analyses.',
     loginBtn:      'Sign in with Google',
     logout:        'Sign out',
     remaining:     (n) => `${n} analysis${n === 1 ? '' : 'es'} remaining`,
@@ -318,8 +318,8 @@ export const translations = {
     copied: '✓ Скопировано!',
 
     // Auth
-    loginTitle:    'Войдите, чтобы начать',
-    loginSub:      'Войдите для анализа изображений.',
+    loginTitle:    'Войдите и попробуйте бесплатно',
+    loginSub:      'После входа — 3 бесплатных анализа.',
     loginBtn:      'Войти через Google',
     logout:        'Выйти',
     remaining:     (n) => `Осталось ${n} анализ${n === 1 ? '' : n < 5 ? 'а' : 'ов'}`,
