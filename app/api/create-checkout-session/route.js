@@ -1,16 +1,7 @@
 import Stripe from 'stripe';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, cert } from 'firebase-admin/app';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Initialize Firebase Admin (if not already done)
-if (!global.firebaseAdminApp) {
-  global.firebaseAdminApp = initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  });
-}
 
 export async function POST(req) {
   try {

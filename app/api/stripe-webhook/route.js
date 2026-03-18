@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
-import { doc, updateDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { adminDb } from '@/lib/firebaseAdmin';
+import admin from 'firebase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -25,15 +25,15 @@ export async function POST(req) {
       const userId = charge.metadata?.userId;
 
       if (userId) {
-        const userRef = doc(db, 'users', userId);
         const premiumExpiresAt = new Date();
         premiumExpiresAt.setDate(premiumExpiresAt.getDate() + 30); // 30-day subscription
 
-        await updateDoc(userRef, {
+        await adminDb.collection('users').doc(userId).update({
           isPremium: true,
-          premiumExpiresAt: Timestamp.fromDate(premiumExpiresAt),
+          premiumExpiresAt: admin.firestore.Timestamp.fromDate(premiumExpiresAt),
           testsUsed: 0,
           stripeChargeId: charge.id,
+          premiumStartedAt: admin.firestore.Timestamp.now(),
         });
       }
       break;
