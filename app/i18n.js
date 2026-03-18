@@ -105,6 +105,15 @@ export const translations = {
     copy:   '⎘ Kopieren',
     copied: '✓ Kopiert!',
 
+    // Auth
+    loginTitle:    'Anmelden um zu starten',
+    loginSub:      'Melde dich an, um deine Bilder zu analysieren.',
+    loginBtn:      'Mit Google anmelden',
+    logout:        'Abmelden',
+    remaining:     (n) => `${n} Analyse${n === 1 ? '' : 'n'} übrig`,
+    limitReached:  'Du hast deine 3 kostenlosen Analysen aufgebraucht.',
+    limitCta:      'Upgrade für unbegrenzte Analysen',
+
     // PWA banner
     pwaTitle:   'App installieren',
     pwaSub:     'Zum Homescreen hinzufügen',
@@ -203,6 +212,15 @@ export const translations = {
     copy:   '⎘ Copy',
     copied: '✓ Copied!',
 
+    // Auth
+    loginTitle:    'Sign in to get started',
+    loginSub:      'Sign in to analyze your images.',
+    loginBtn:      'Sign in with Google',
+    logout:        'Sign out',
+    remaining:     (n) => `${n} analysis${n === 1 ? '' : 'es'} remaining`,
+    limitReached:  'You\'ve used all 3 free analyses.',
+    limitCta:      'Upgrade for unlimited analyses',
+
     pwaTitle:   'Install App',
     pwaSub:     'Add to home screen',
     pwaBtn:     'Install',
@@ -298,6 +316,15 @@ export const translations = {
 
     copy:   '⎘ Копировать',
     copied: '✓ Скопировано!',
+
+    // Auth
+    loginTitle:    'Войдите, чтобы начать',
+    loginSub:      'Войдите для анализа изображений.',
+    loginBtn:      'Войти через Google',
+    logout:        'Выйти',
+    remaining:     (n) => `Осталось ${n} анализ${n === 1 ? '' : n < 5 ? 'а' : 'ов'}`,
+    limitReached:  'Вы использовали все 3 бесплатных анализа.',
+    limitCta:      'Обновите для безлимитного анализа',
 
     pwaTitle:   'Установить приложение',
     pwaSub:     'Добавить на главный экран',

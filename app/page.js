@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { translations } from './i18n';
+import { useAuth } from './context/AuthContext';
 
 const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
 
@@ -460,6 +461,7 @@ function AnalysisTabs({ data, t }) {
 
 // ─── Main Page ────────────────────────────────────────
 export default function Home() {
+  const { user, authLoading, canAnalyze, remaining, signInWithGoogle, signOut, incrementUsage } = useAuth();
   const [lang, setLang] = useState('de');
   const t = translations[lang];
 
@@ -530,6 +532,10 @@ export default function Home() {
 
   const handleAnalyze = async () => {
     if (!imageFile) return;
+    if (!canAnalyze) {
+      setError(t.limitReached);
+      return;
+    }
     setLoading(true);
     setError(null);
     setLoadingStep(1);
@@ -547,6 +553,7 @@ export default function Home() {
       stepTimers.forEach(clearTimeout);
       if (!res.ok) throw new Error(data.error || 'Analyse fehlgeschlagen');
       setResult(data);
+      await incrementUsage();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -625,6 +632,22 @@ export default function Home() {
               {t.newImage}
             </button>
           )}
+
+          {/* User info */}
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-200">
+                <span className="text-[10px] font-bold text-violet-600">{t.remaining(remaining)}</span>
+              </div>
+              {user.photoURL && (
+                <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full border border-[#e8e5f0]" referrerPolicy="no-referrer" />
+              )}
+              <button onClick={signOut}
+                className="text-[10px] sm:text-xs text-[#6b6884] hover:text-red-500 font-semibold transition-colors">
+                {t.logout}
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -673,51 +696,89 @@ export default function Home() {
               <p className="text-sm text-[#6b6884]">{t.heroSub}</p>
             </div>
 
-            {/* Platform tabs */}
-            <div className="flex bg-white border border-[#e8e5f0] rounded-xl p-1 gap-1 w-full">
-              {PLATFORMS.map((p) => (
-                <button key={p} onClick={() => setPlatform(p)}
-                  className={`flex-1 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap px-1
-                    ${platform === p ? 'bg-violet-600 text-white shadow-sm' : 'text-[#6b6884]'}`}>
-                  {p}
+            {/* Not logged in → show login */}
+            {!authLoading && !user ? (
+              <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl p-8 text-center shadow-sm">
+                <div className="text-4xl mb-3">🔐</div>
+                <h2 className="text-lg font-extrabold text-[#0f0e17] mb-1">{t.loginTitle}</h2>
+                <p className="text-sm text-[#6b6884] mb-5">{t.loginSub}</p>
+                <button onClick={signInWithGoogle}
+                  className="w-full py-3.5 bg-[#0f0e17] text-white rounded-xl text-sm font-bold hover:bg-[#1a1930] transition-colors flex items-center justify-center gap-3 active:scale-[0.98]">
+                  <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+                  {t.loginBtn}
                 </button>
-              ))}
-            </div>
-
-            {/* Category pills */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {t.categories.map(({ label, value }) => (
-                <button key={value} onClick={() => setCategory(value)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95
-                    ${category === value
-                      ? 'bg-violet-100 border-violet-400 text-violet-700'
-                      : 'bg-white border-[#e8e5f0] text-[#6b6884]'}`}>
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Upload / Preview */}
-            {!imagePreview ? (
-              <UploadZone onFile={handleFile} t={t} />
-            ) : (
-              <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
-                <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
-                  <button onClick={() => { setImageFile(null); setImagePreview(null); }}
-                    className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
-                    ×
-                  </button>
-                </div>
-                <div className="p-4">
-                  <div className="text-sm font-bold text-[#0f0e17] mb-0.5 truncate">{imageFile?.name}</div>
-                  <div className="text-xs text-[#6b6884] mb-4">{platform} · {category} · {(imageFile?.size / 1024).toFixed(0)} KB</div>
-                  <button onClick={handleAnalyze} disabled={loading}
-                    className="w-full py-3.5 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]">
-                    {t.analyzeBtn}
-                  </button>
-                </div>
               </div>
+            ) : authLoading ? (
+              <div className="py-12 flex items-center justify-center">
+                <span className="spinner w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full inline-block" />
+              </div>
+            ) : (
+              <>
+                {/* Remaining analyses badge (mobile) */}
+                <div className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 border border-violet-200">
+                  <span className="text-xs font-bold text-violet-600">{t.remaining(remaining)}</span>
+                </div>
+
+                {/* Platform tabs */}
+                <div className="flex bg-white border border-[#e8e5f0] rounded-xl p-1 gap-1 w-full">
+                  {PLATFORMS.map((p) => (
+                    <button key={p} onClick={() => setPlatform(p)}
+                      className={`flex-1 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap px-1
+                        ${platform === p ? 'bg-violet-600 text-white shadow-sm' : 'text-[#6b6884]'}`}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Category pills */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {t.categories.map(({ label, value }) => (
+                    <button key={value} onClick={() => setCategory(value)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95
+                        ${category === value
+                          ? 'bg-violet-100 border-violet-400 text-violet-700'
+                          : 'bg-white border-[#e8e5f0] text-[#6b6884]'}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Limit reached */}
+                {!canAnalyze ? (
+                  <div className="w-full bg-gradient-to-br from-violet-50 to-pink-50 border border-violet-200 rounded-2xl p-8 text-center">
+                    <div className="text-4xl mb-3">🔒</div>
+                    <h2 className="text-lg font-extrabold text-[#0f0e17] mb-2">{t.limitReached}</h2>
+                    <button className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl text-sm font-bold hover:from-violet-700 hover:to-pink-700 transition-all active:scale-[0.98]">
+                      {t.limitCta}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Upload / Preview */}
+                    {!imagePreview ? (
+                      <UploadZone onFile={handleFile} t={t} />
+                    ) : (
+                      <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
+                        <div className="relative">
+                          <img src={imagePreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
+                          <button onClick={() => { setImageFile(null); setImagePreview(null); }}
+                            className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
+                            ×
+                          </button>
+                        </div>
+                        <div className="p-4">
+                          <div className="text-sm font-bold text-[#0f0e17] mb-0.5 truncate">{imageFile?.name}</div>
+                          <div className="text-xs text-[#6b6884] mb-4">{platform} · {category} · {(imageFile?.size / 1024).toFixed(0)} KB</div>
+                          <button onClick={handleAnalyze} disabled={loading}
+                            className="w-full py-3.5 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]">
+                            {t.analyzeBtn}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
             )}
 
             {error && (
