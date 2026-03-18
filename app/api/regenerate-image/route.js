@@ -59,6 +59,7 @@ CATEGORY-SPECIFIC ENHANCEMENT (${category}):
 - Atmosphere: ${categoryConfig.atmosphere}
 - Enhancement details: ${categoryConfig.enhancement}
 - Adjust colors, tone, and mood to match the ${category} category
+- Facial expression: Adjust facial expression to match the ${category} mood (Business=professional/confident, Luxury=elegant/satisfied, Fitness=energetic/determined, Lifestyle=relaxed/natural, Travel=adventurous/inspired, Food=warm/inviting)
 
 STRICT RULES - DO NOT CHANGE:
 - Keep the same person with identical face, appearance, clothing, and hairstyle
