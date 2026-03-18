@@ -107,23 +107,25 @@ function ImageCompareSlider({ before, after, labelBefore = 'Vorher', labelAfter 
     updatePos(cx);
   };
 
-  // Portrait images: limit width so height stays reasonable
-  // Landscape/square: use full width
+  // Portrait: limit width. All formats: cap height at 60vh
   const isPortrait = aspect !== null && aspect < 0.9;
-  const wrapStyle = isPortrait ? { maxWidth: '65vh', margin: '0 auto' } : {};
+  const maxH = '60vh';
+  const wrapStyle = isPortrait
+    ? { maxWidth: `calc(${maxH} * ${aspect || 0.5625})`, margin: '0 auto' }
+    : {};
 
   return (
     <div style={wrapStyle}>
       <div
         ref={containerRef}
         className="relative w-full select-none overflow-hidden rounded-2xl border border-[#e8e5f0] bg-black cursor-col-resize"
-        style={{ maxHeight: '80vh' }}
+        style={{ maxHeight: maxH }}
         onMouseDown={onStart}
         onTouchStart={onStart}
       >
         {/* After image (full, sets container height) */}
         <img src={after} alt="After" draggable={false}
-          className="block w-full h-auto" style={{ maxHeight: '80vh', objectFit: 'contain' }} />
+          className="block w-full h-auto" style={{ maxHeight: maxH, objectFit: 'contain' }} />
 
         {/* Before image (clipped from left) */}
         <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
@@ -773,7 +775,7 @@ export default function Home() {
               ) : (
                 <div className="bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
                   <img src={imagePreview} alt="Uploaded"
-                    className="w-full h-auto max-h-[70vh] object-contain" />
+                    className="w-full h-auto max-h-[60vh] object-contain" />
                   <div className="p-3 flex items-center justify-between">
                     <div className="flex gap-3 text-xs text-[#6b6884]">
                       <span>{imageFile?.name?.slice(0, 20)}{imageFile?.name?.length > 20 ? '…' : ''}</span>
