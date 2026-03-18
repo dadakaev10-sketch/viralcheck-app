@@ -503,10 +503,6 @@ export default function Home() {
             ))}
           </div>
 
-          <span className="hidden sm:inline-flex text-xs font-semibold text-[#6b6884] bg-violet-50 border border-violet-200 px-3 py-1 rounded-full">
-            {t.badgeLabel}
-          </span>
-
           {result && (
             <button onClick={reset}
               className="text-xs sm:text-sm font-bold text-violet-600 border border-violet-200 px-3 py-1.5 rounded-lg hover:bg-violet-50 transition-colors active:scale-95">
@@ -552,9 +548,6 @@ export default function Home() {
 
             {/* Headline */}
             <div className="text-center">
-              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-violet-100 rounded-full text-xs font-bold text-violet-700 mb-4">
-                {t.heroBadge}
-              </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0f0e17] mb-2 leading-tight">
                 {t.heroLine1}<br />
                 <span style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
