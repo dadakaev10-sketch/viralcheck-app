@@ -90,9 +90,11 @@ This must look like the same photo, just professionally lit and color graded.`;
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-2-image-1212',
+        model: 'grok-imagine-image',
         prompt: enhancementPrompt,
         n: 1,
+        aspect_ratio: '1:1',
+        resolution: '1k',
         response_format: 'b64_json',
       }),
     });
