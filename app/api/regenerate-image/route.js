@@ -13,11 +13,15 @@ export async function POST(request) {
       return Response.json({ error: 'XAI_API_KEY fehlt in .env.local' }, { status: 500 });
     }
 
-    // Build prompt: keep original image, only improve lighting/contrast/colors
-    const enhancementPrompt = `Take this exact image and only make these minimal professional improvements:
+    // Build prompt: keep original image, apply analysis improvements + lighting/contrast
+    const enhancementPrompt = `Take this exact image and apply these improvements:
 
-- Better professional lighting (softer, more flattering)
-- Slightly improved contrast and color grading
+IMPROVEMENTS FROM ANALYSIS:
+${improvements.map((tip, i) => `${i + 1}. ${tip}`).join('\n')}
+
+ALSO IMPROVE:
+- Professional lighting (softer, more flattering)
+- Contrast and color grading
 - Cleaner, more polished overall look
 - If person looks neutral/serious: add a subtle natural smile only
 
