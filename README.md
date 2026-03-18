@@ -41,7 +41,7 @@ App läuft auf http://localhost:3000
 ## Tech Stack
 
 - **Next.js 15** (App Router)
-- **X.AI Grok 4** Vision API (Image Analysis)
+- **X.AI Grok 4.1 Fast Reasoning** (Image Analysis)
 - **X.AI Grok Imagine** (Image Generation)
 - **Tailwind CSS**
 - **React 19**

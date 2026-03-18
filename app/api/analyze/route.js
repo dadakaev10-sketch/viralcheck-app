@@ -78,7 +78,7 @@ Required JSON format (all fields mandatory):
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-4-1-vision-latest',
+        model: 'grok-4-1-fast-reasoning',
         messages: [
           {
             role: 'user',
