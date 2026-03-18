@@ -34,24 +34,18 @@ STRICT RULES - DO NOT CHANGE:
 
 This must look like the SAME photo, just professionally enhanced. Platform: ${platform} | Category: ${category}`;
 
-    // Send original image directly to grok-imagine-image (supports image input)
+    // Use /v1/images/edits endpoint to edit the original image directly
     const requestBody = {
       model: 'grok-imagine-image',
       prompt: enhancementPrompt,
-      n: 1,
-      aspect_ratio: '1:1',
-      resolution: '1k',
+      image: {
+        url: `data:${imageMimeType || 'image/jpeg'};base64,${imageBase64}`,
+        type: 'image_url',
+      },
       response_format: 'b64_json',
     };
 
-    // Attach original image as input if available
-    if (imageBase64) {
-      requestBody.image = {
-        url: `data:${imageMimeType || 'image/jpeg'};base64,${imageBase64}`,
-      };
-    }
-
-    const response = await fetch('https://api.x.ai/v1/images/generations', {
+    const response = await fetch('https://api.x.ai/v1/images/edits', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
