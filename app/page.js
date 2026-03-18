@@ -667,9 +667,15 @@ export default function Home() {
                       ))}
                     </div>
                     {regeneratedImage && (
-                      <div className="mt-2 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg font-semibold border border-green-200">
-                        ✓ {lang === 'de' ? 'Regeneriert' : lang === 'en' ? 'Regenerated' : 'Перегенерировано'}
-                      </div>
+                      <>
+                        <div className="mt-2 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg font-semibold border border-green-200">
+                          ✓ {lang === 'de' ? 'Regeneriert' : lang === 'en' ? 'Regenerated' : 'Перегенерировано'}
+                        </div>
+                        <a href={regeneratedImage} download="viralcheck-regenerated.png"
+                          className="mt-2 w-full py-2 bg-gradient-to-r from-violet-500 to-violet-700 text-white rounded-lg text-xs font-bold text-center block hover:from-violet-600 hover:to-violet-800 transition-all active:scale-95">
+                          {lang === 'de' ? 'Bild speichern' : lang === 'en' ? 'Download image' : 'Скачать изображение'}
+                        </a>
+                      </>
                     )}
                     <button onClick={reset}
                       className="mt-2.5 w-full py-2 border border-[#e8e5f0] rounded-lg text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
