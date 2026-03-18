@@ -18,6 +18,7 @@ export const translations = {
       { label: '💪 Fitness',    value: 'Fitness' },
       { label: '✈️ Travel',     value: 'Travel' },
       { label: '💼 Business',   value: 'Business' },
+      { label: '✨ Luxury',     value: 'Luxury' },
     ],
 
     // Upload zone
@@ -128,6 +129,7 @@ export const translations = {
       { label: '💪 Fitness',    value: 'Fitness' },
       { label: '✈️ Travel',     value: 'Travel' },
       { label: '💼 Business',   value: 'Business' },
+      { label: '✨ Luxury',     value: 'Luxury' },
     ],
 
     uploadTitle: 'Select image',
