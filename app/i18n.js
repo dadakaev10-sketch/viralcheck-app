@@ -2,10 +2,10 @@ export const translations = {
   de: {
     // Header
     newImage: '← Neues Bild',
-    badgeLabel: 'X.AI',
+    badgeLabel: '',
 
     // Hero
-    heroBadge: '✨ X.AI Vision',
+    heroBadge: '',
     heroLine1: 'Geht dein Post',
     heroLine2: 'viral?',
     heroSub: 'KI analysiert Viral-Potenzial, Caption & Hashtags.',
