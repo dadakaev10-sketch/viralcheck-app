@@ -14,12 +14,20 @@ export async function POST(request) {
     }
 
     // Build enhancement prompt from improvements
-    const enhancementPrompt = `Based on this image concept for ${platform} in the ${category} category, create an improved version that implements these suggestions:
+    const enhancementPrompt = `Enhance this image for ${platform} in the ${category} category.
+
+**CRITICAL RULES:**
+- Keep the same person(s), room, and composition - DO NOT change faces or fundamental layout
+- Only improve: lighting, contrast, colors, minimal decor/props, and professionalism
+- Maximum facial change: subtle smile or slight better expression (same person)
+- Keep identity and context exactly the same
+
+**Enhancement suggestions to implement:**
 ${improvements.map((tip, i) => `${i + 1}. ${tip}`).join('\n')}
 
 Original concept: ${imageContent}
 
-Create a visually appealing, professional image that incorporates all the improvement suggestions while maintaining the original concept. The image should be optimized for social media engagement and viral potential.`;
+Make the image look more professional, well-lit, and visually appealing for social media without changing the core subject or faces.`;
 
     const response = await fetch('https://api.x.ai/v1/images/generations', {
       method: 'POST',
