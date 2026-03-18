@@ -448,16 +448,24 @@ export default function Home() {
   };
 
   const handleRegenerateImage = async () => {
-    if (!result || !result.wasVerbessern) return;
+    if (!result || !result.wasVerbessern || !imageFile) return;
     setRegenerating(true);
     setError(null);
     try {
+      // Convert image to base64 so the API can see the original
+      const base64Image = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+        reader.readAsDataURL(imageFile);
+      });
       const res = await fetch('/api/regenerate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           improvements: result.wasVerbessern,
           imageContent: result.imageContent,
+          imageBase64: base64Image,
+          imageMimeType: imageFile.type || 'image/jpeg',
           platform,
           category,
         }),

@@ -2,32 +2,86 @@ export const maxDuration = 120;
 
 export async function POST(request) {
   try {
-    const { improvements, imageContent, platform, category } = await request.json();
+    const { improvements, imageContent, imageBase64, imageMimeType, platform, category } = await request.json();
 
     if (!improvements || !Array.isArray(improvements) || improvements.length === 0) {
       return Response.json({ error: 'Keine Verbesserungsvorschläge gefunden.' }, { status: 400 });
     }
 
-    const apiKey = process.env.XAI_IMAGE_API_KEY;
+    const apiKey = process.env.XAI_IMAGE_API_KEY || process.env.XAI_API_KEY;
     if (!apiKey) {
-      return Response.json({ error: 'XAI_IMAGE_API_KEY fehlt in .env.local' }, { status: 500 });
+      return Response.json({ error: 'XAI_API_KEY fehlt in .env.local' }, { status: 500 });
     }
 
-    // Build enhancement prompt from improvements
-    const enhancementPrompt = `Enhance this image for ${platform} in the ${category} category.
+    // STEP 1: Use Grok Vision to get a very detailed description of the original image
+    // This ensures we preserve the person, room, and composition exactly
+    let detailedDescription = imageContent || '';
 
-**CRITICAL RULES:**
-- Keep the same person(s), room, and composition - DO NOT change faces or fundamental layout
-- Only improve: lighting, contrast, colors, minimal decor/props, and professionalism
-- Maximum facial change: subtle smile or slight better expression (same person)
-- Keep identity and context exactly the same
+    if (imageBase64) {
+      const visionResponse = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'grok-2-vision-latest',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${imageMimeType || 'image/jpeg'};base64,${imageBase64}`,
+                  },
+                },
+                {
+                  type: 'text',
+                  text: `Describe this image in extreme detail for image reproduction. Include:
+- Person: exact appearance (age, hair color/style, skin tone, clothing colors/style, facial features, expression)
+- Room/background: exact layout, furniture, colors, materials, decor items, walls, floor
+- Lighting: direction, quality, color temperature
+- Composition: where person is positioned, camera angle, framing
+- Overall mood and style
 
-**Enhancement suggestions to implement:**
-${improvements.map((tip, i) => `${i + 1}. ${tip}`).join('\n')}
+Be very specific and precise. This description will be used to recreate the same scene.`,
+                },
+              ],
+            },
+          ],
+          max_tokens: 1000,
+        }),
+      });
 
-Original concept: ${imageContent}
+      if (visionResponse.ok) {
+        const visionData = await visionResponse.json();
+        detailedDescription = visionData.choices?.[0]?.message?.content || imageContent;
+      }
+    }
 
-Make the image look more professional, well-lit, and visually appealing for social media without changing the core subject or faces.`;
+    // STEP 2: Generate improved image based on the EXACT description
+    // Only allow minimal aesthetic improvements - NO changes to person or room
+    const enhancementPrompt = `Recreate this exact scene with only professional lighting and color improvements:
+
+SCENE TO RECREATE EXACTLY:
+${detailedDescription}
+
+STRICT RULES - DO NOT CHANGE:
+- Same person with identical appearance, clothing, hairstyle, and face
+- Same room layout, furniture, and decor
+- Same composition and camera angle
+- Same background elements
+
+ONLY THESE MINIMAL IMPROVEMENTS ALLOWED:
+- Better professional lighting (softer, more flattering)
+- Slightly improved contrast and color grading
+- Cleaner, more polished overall look
+- If person looks neutral/serious: subtle natural smile only
+
+Platform: ${platform} | Category: ${category}
+
+This must look like the same photo, just professionally lit and color graded.`;
 
     const response = await fetch('https://api.x.ai/v1/images/generations', {
       method: 'POST',
@@ -36,11 +90,9 @@ Make the image look more professional, well-lit, and visually appealing for soci
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-imagine-image',
+        model: 'grok-2-image-1212',
         prompt: enhancementPrompt,
         n: 1,
-        aspect_ratio: '1:1',
-        resolution: '1k',
         response_format: 'b64_json',
       }),
     });
