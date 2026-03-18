@@ -1,7 +1,44 @@
+import { adminAuth } from '../../lib/firebase-admin';
+import { checkUsage, incrementUsage, ensureUser } from '../../lib/usage';
+
 export const maxDuration = 60;
 
 export async function POST(request) {
   try {
+    // ── Auth & Usage check ──
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    let userId = null;
+    let anonId = null;
+
+    if (token) {
+      try {
+        const decoded = await adminAuth.verifyIdToken(token);
+        userId = decoded.uid;
+        await ensureUser(decoded.uid, decoded.email, decoded.name, decoded.picture);
+      } catch {
+        return Response.json({ error: 'Ungültiges Token.' }, { status: 401 });
+      }
+    } else {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+      anonId = Buffer.from(ip).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    }
+
+    const usage = await checkUsage(userId, anonId);
+    if (!usage.allowed) {
+      return Response.json({
+        error: userId
+          ? (usage.isPremium
+            ? 'Tageslimit erreicht (20/Tag). Versuche es morgen erneut.'
+            : 'Gratis-Tests aufgebraucht. Hol dir Premium für 20 Tests/Tag!')
+          : 'Kostenloser Test verwendet. Melde dich an für 3 Gratis-Tests!',
+        limitReached: true,
+        ...usage,
+      }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const imageFile = formData.get('image');
     const platform  = formData.get('platform') || 'Instagram Post';
@@ -108,6 +145,10 @@ Required JSON format (all fields mandatory):
       .trim();
 
     const analysis = JSON.parse(cleaned);
+
+    // ── Increment usage after successful analysis ──
+    await incrementUsage(userId, anonId);
+
     return Response.json(analysis);
 
   } catch (error) {

@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { translations } from './i18n';
+import { auth, googleProvider } from './lib/firebase';
+import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 
 const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
 
@@ -14,9 +16,9 @@ function saveLang(l) {
 }
 
 const LANGS = [
-  { code: 'de', flag: '🇩🇪', label: 'DE' },
-  { code: 'en', flag: '🇬🇧', label: 'EN' },
-  { code: 'ru', flag: '🇷🇺', label: 'RU' },
+  { code: 'de', flag: '\u{1F1E9}\u{1F1EA}', label: 'DE' },
+  { code: 'en', flag: '\u{1F1EC}\u{1F1E7}', label: 'EN' },
+  { code: 'ru', flag: '\u{1F1F7}\u{1F1FA}', label: 'RU' },
 ];
 
 function scoreColor(v) {
@@ -28,11 +30,9 @@ function scoreColor(v) {
 function useCopy() {
   const [copiedKey, setCopiedKey] = useState(null);
   const copy = useCallback((text, key) => {
-    // navigator.clipboard requires secure context + user gesture; guard for older iOS
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).catch(() => {});
     } else {
-      // Fallback: execCommand (deprecated but works on old iOS Safari)
       try {
         const ta = document.createElement('textarea');
         ta.value = text;
@@ -142,6 +142,139 @@ function UploadZone({ onFile, t }) {
         {t.uploadBtn}
       </div>
       <div className="mt-3 text-xs text-[#a09db8]">{t.uploadHint}</div>
+    </div>
+  );
+}
+
+// ─── Usage Badge ──────────────────────────────────────
+function UsageBadge({ usage, lang }) {
+  if (!usage) return null;
+  const labels = {
+    de: { remaining: 'Tests übrig', of: 'von', today: 'heute' },
+    en: { remaining: 'tests left', of: 'of', today: 'today' },
+    ru: { remaining: 'тестов осталось', of: 'из', today: 'сегодня' },
+  }[lang] || { remaining: 'tests left', of: 'of', today: 'today' };
+
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#f5f4f8] border border-[#e8e5f0] text-xs">
+      <span className={`font-bold ${usage.remaining > 0 ? 'text-green-600' : 'text-red-500'}`}>
+        {usage.remaining}/{usage.limit}
+      </span>
+      <span className="text-[#6b6884]">{labels.remaining}</span>
+    </div>
+  );
+}
+
+// ─── Premium Banner ───────────────────────────────────
+function PremiumBanner({ lang, onLogin }) {
+  const content = {
+    de: {
+      title: 'Premium freischalten',
+      sub: '20 Analysen/Tag für nur 19€/Monat',
+      btn: 'Premium holen',
+      login: 'Erst anmelden',
+    },
+    en: {
+      title: 'Unlock Premium',
+      sub: '20 analyses/day for just €19/month',
+      btn: 'Get Premium',
+      login: 'Sign in first',
+    },
+    ru: {
+      title: 'Получить Premium',
+      sub: '20 анализов/день за 19€/месяц',
+      btn: 'Получить Premium',
+      login: 'Сначала войдите',
+    },
+  }[lang] || {
+    title: 'Unlock Premium',
+    sub: '20 analyses/day for just €19/month',
+    btn: 'Get Premium',
+    login: 'Sign in first',
+  };
+
+  return (
+    <div className="w-full bg-gradient-to-r from-violet-600 to-pink-500 rounded-2xl p-4 sm:p-5 text-white shadow-lg">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-extrabold">{content.title}</div>
+          <div className="text-xs opacity-90 mt-0.5">{content.sub}</div>
+        </div>
+        {onLogin ? (
+          <button onClick={onLogin}
+            className="px-4 py-2 bg-white text-violet-700 rounded-xl text-xs font-bold hover:bg-violet-50 transition-all active:scale-95 whitespace-nowrap">
+            {content.login}
+          </button>
+        ) : (
+          <a href={process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK}
+            target="_blank" rel="noopener noreferrer"
+            className="px-4 py-2 bg-white text-violet-700 rounded-xl text-xs font-bold hover:bg-violet-50 transition-all active:scale-95 whitespace-nowrap">
+            {content.btn}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Limit Reached Banner ─────────────────────────────
+function LimitBanner({ usage, lang, user, onLogin }) {
+  const isAnon = !user;
+  const isFree = user && !usage?.isPremium;
+
+  const content = {
+    de: {
+      anonTitle: 'Kostenloser Test aufgebraucht',
+      anonSub: 'Melde dich an und erhalte 3 Gratis-Tests!',
+      anonBtn: 'Mit Google anmelden',
+      freeTitle: 'Gratis-Tests aufgebraucht',
+      freeSub: 'Hol dir Premium für 20 Analysen/Tag!',
+      premiumTitle: 'Tageslimit erreicht',
+      premiumSub: 'Du hast heute alle 20 Analysen verbraucht. Morgen geht es weiter!',
+    },
+    en: {
+      anonTitle: 'Free test used',
+      anonSub: 'Sign in to get 3 free tests!',
+      anonBtn: 'Sign in with Google',
+      freeTitle: 'Free tests used up',
+      freeSub: 'Get Premium for 20 analyses/day!',
+      premiumTitle: 'Daily limit reached',
+      premiumSub: 'You used all 20 analyses today. Come back tomorrow!',
+    },
+    ru: {
+      anonTitle: 'Бесплатный тест использован',
+      anonSub: 'Войдите, чтобы получить 3 бесплатных теста!',
+      anonBtn: 'Войти через Google',
+      freeTitle: 'Бесплатные тесты закончились',
+      freeSub: 'Получите Premium для 20 анализов/день!',
+      premiumTitle: 'Дневной лимит исчерпан',
+      premiumSub: 'Вы использовали все 20 анализов сегодня. Возвращайтесь завтра!',
+    },
+  }[lang] || {};
+
+  return (
+    <div className="w-full bg-orange-50 border border-orange-200 rounded-2xl p-5 text-center">
+      <div className="text-2xl mb-2">{isAnon ? '🔓' : isFree ? '⭐' : '📊'}</div>
+      <div className="text-sm font-extrabold text-[#0f0e17] mb-1">
+        {isAnon ? content.anonTitle : isFree ? content.freeTitle : content.premiumTitle}
+      </div>
+      <div className="text-xs text-[#6b6884] mb-4">
+        {isAnon ? content.anonSub : isFree ? content.freeSub : content.premiumSub}
+      </div>
+      {isAnon && (
+        <button onClick={onLogin}
+          className="px-6 py-2.5 bg-white border border-[#e8e5f0] rounded-xl text-sm font-bold text-[#3d3a52] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95 flex items-center gap-2 mx-auto">
+          <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          {content.anonBtn}
+        </button>
+      )}
+      {isFree && (
+        <a href={process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK}
+          target="_blank" rel="noopener noreferrer"
+          className="inline-block px-6 py-2.5 bg-gradient-to-r from-violet-600 to-pink-500 text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all active:scale-95">
+          Premium - 19€/Monat
+        </a>
+      )}
     </div>
   );
 }
@@ -366,16 +499,36 @@ export default function Home() {
   const [regenerating, setRegenerating] = useState(false);
   const [regeneratedImage, setRegeneratedImage] = useState(null);
 
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [usage, setUsage] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   // PWA install prompt
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
+  // ── Fetch usage ──
+  const fetchUsage = useCallback(async (firebaseUser) => {
+    try {
+      const headers = {};
+      if (firebaseUser) {
+        const token = await firebaseUser.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch('/api/auth/usage', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setUsage(data);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
-    // Restore saved language preference (safe – won't throw in iOS Private Mode)
     const saved = getLang();
     if (saved && translations[saved]) setLang(saved);
 
-    // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
@@ -392,15 +545,42 @@ export default function Home() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Auth listener
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      setAuthLoading(false);
+      await fetchUsage(firebaseUser);
+    });
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      unsub();
     };
-  }, []);
+  }, [fetchUsage]);
 
   const changeLang = (l) => {
     setLang(l);
     saveLang(l);
+  };
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError(err.message);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setShowUserMenu(false);
+    setUsage(null);
+    // Re-fetch anonymous usage
+    await fetchUsage(null);
   };
 
   const handleInstall = async () => {
@@ -429,16 +609,28 @@ export default function Home() {
       setTimeout(() => setLoadingStep(i + 2), delay)
     );
     try {
+      const headers = {};
+      if (user) {
+        const token = await user.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const fd = new FormData();
       fd.append('image', imageFile);
       fd.append('platform', platform);
       fd.append('category', category);
       fd.append('language', lang);
-      const res = await fetch('/api/analyze', { method: 'POST', body: fd });
+      const res = await fetch('/api/analyze', { method: 'POST', headers, body: fd });
       const data = await res.json();
       stepTimers.forEach(clearTimeout);
-      if (!res.ok) throw new Error(data.error || 'Analyse fehlgeschlagen');
+      if (!res.ok) {
+        if (data.limitReached) {
+          setUsage(prev => ({ ...prev, ...data, allowed: false, remaining: 0 }));
+        }
+        throw new Error(data.error || 'Analyse fehlgeschlagen');
+      }
       setResult(data);
+      // Refresh usage after successful analysis
+      await fetchUsage(user);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -452,7 +644,6 @@ export default function Home() {
     setRegenerating(true);
     setError(null);
     try {
-      // Convert image to base64 so the API can see the original
       const base64Image = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target.result.split(',')[1]);
@@ -488,6 +679,8 @@ export default function Home() {
     setRegeneratedImage(null);
   };
 
+  const limitReached = usage && !usage.allowed;
+
   return (
     <div className="min-h-screen" style={{ background: '#f5f4f8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
@@ -500,7 +693,10 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* ── Language switcher ── */}
+          {/* Usage badge */}
+          {!authLoading && <UsageBadge usage={usage} lang={lang} />}
+
+          {/* Language switcher */}
           <div className="flex items-center bg-[#f5f4f8] border border-[#e8e5f0] rounded-lg p-0.5 gap-0.5">
             {LANGS.map(({ code, flag, label }) => (
               <button key={code} onClick={() => changeLang(code)}
@@ -510,6 +706,55 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Auth button */}
+          {!authLoading && (
+            user ? (
+              <div className="relative">
+                <button onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="w-8 h-8 rounded-full overflow-hidden border-2 border-violet-300 hover:border-violet-500 transition-colors">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full bg-violet-100 flex items-center justify-center text-xs font-bold text-violet-700">
+                      {user.displayName?.[0] || user.email?.[0] || '?'}
+                    </div>
+                  )}
+                </button>
+                {showUserMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                    <div className="absolute right-0 top-10 bg-white border border-[#e8e5f0] rounded-xl shadow-xl p-3 z-50 min-w-[200px]">
+                      <div className="text-xs font-bold text-[#0f0e17] truncate">{user.displayName || user.email}</div>
+                      <div className="text-[10px] text-[#6b6884] truncate mb-2">{user.email}</div>
+                      {usage?.isPremium && (
+                        <div className="px-2 py-1 bg-gradient-to-r from-violet-100 to-pink-100 text-violet-700 text-[10px] font-bold rounded-lg mb-2">
+                          ⭐ Premium
+                        </div>
+                      )}
+                      {!usage?.isPremium && (
+                        <a href={process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK}
+                          target="_blank" rel="noopener noreferrer"
+                          className="block px-2 py-1.5 text-xs font-bold text-violet-600 hover:bg-violet-50 rounded-lg mb-1 transition-colors">
+                          ⭐ Premium holen - 19€
+                        </a>
+                      )}
+                      <button onClick={handleLogout}
+                        className="w-full text-left px-2 py-1.5 text-xs text-[#6b6884] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        {lang === 'de' ? 'Abmelden' : lang === 'en' ? 'Sign out' : 'Выйти'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <button onClick={handleLogin}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e8e5f0] rounded-lg text-xs font-bold text-[#3d3a52] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                {lang === 'de' ? 'Anmelden' : lang === 'en' ? 'Sign in' : 'Войти'}
+              </button>
+            )
+          )}
 
           {result && (
             <button onClick={reset}
@@ -589,26 +834,54 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Upload / Preview */}
-            {!imagePreview ? (
-              <UploadZone onFile={handleFile} t={t} />
-            ) : (
-              <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
-                <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full max-h-64 object-cover" />
-                  <button onClick={() => { setImageFile(null); setImagePreview(null); }}
-                    className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
-                    ×
-                  </button>
+            {/* Limit reached banner */}
+            {limitReached && (
+              <LimitBanner usage={usage} lang={lang} user={user} onLogin={handleLogin} />
+            )}
+
+            {/* Upload / Preview - only show if not limit reached */}
+            {!limitReached && (
+              <>
+                {!imagePreview ? (
+                  <UploadZone onFile={handleFile} t={t} />
+                ) : (
+                  <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
+                    <div className="relative">
+                      <img src={imagePreview} alt="Preview" className="w-full max-h-64 object-cover" />
+                      <button onClick={() => { setImageFile(null); setImagePreview(null); }}
+                        className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
+                        ×
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <div className="text-sm font-bold text-[#0f0e17] mb-0.5 truncate">{imageFile?.name}</div>
+                      <div className="text-xs text-[#6b6884] mb-4">{platform} · {category} · {(imageFile?.size / 1024).toFixed(0)} KB</div>
+                      <button onClick={handleAnalyze} disabled={loading}
+                        className="w-full py-3.5 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]">
+                        {t.analyzeBtn}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Premium banner for non-premium users */}
+            {!limitReached && user && !usage?.isPremium && (
+              <PremiumBanner lang={lang} />
+            )}
+
+            {/* Login prompt for anonymous users who haven't hit limit yet */}
+            {!limitReached && !user && !authLoading && (
+              <div className="w-full bg-white border border-[#e8e5f0] rounded-xl p-4 text-center">
+                <div className="text-xs text-[#6b6884] mb-2">
+                  {lang === 'de' ? 'Melde dich an für 3 Gratis-Tests' : lang === 'en' ? 'Sign in for 3 free tests' : 'Войдите для 3 бесплатных тестов'}
                 </div>
-                <div className="p-4">
-                  <div className="text-sm font-bold text-[#0f0e17] mb-0.5 truncate">{imageFile?.name}</div>
-                  <div className="text-xs text-[#6b6884] mb-4">{platform} · {category} · {(imageFile?.size / 1024).toFixed(0)} KB</div>
-                  <button onClick={handleAnalyze} disabled={loading}
-                    className="w-full py-3.5 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]">
-                    {t.analyzeBtn}
-                  </button>
-                </div>
+                <button onClick={handleLogin}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e5f0] rounded-xl text-xs font-bold text-[#3d3a52] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95 mx-auto">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  {lang === 'de' ? 'Mit Google anmelden' : lang === 'en' ? 'Sign in with Google' : 'Войти через Google'}
+                </button>
               </div>
             )}
 
