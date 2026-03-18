@@ -2,10 +2,10 @@ export const translations = {
   de: {
     // Header
     newImage: '← Neues Bild',
-    badgeLabel: 'Gemini 2.5 Flash',
+    badgeLabel: '',
 
     // Hero
-    heroBadge: '✨ Gemini 2.5 Flash Vision',
+    heroBadge: '',
     heroLine1: 'Geht dein Post',
     heroLine2: 'viral?',
     heroSub: 'KI analysiert Viral-Potenzial, Caption & Hashtags.',
@@ -114,9 +114,9 @@ export const translations = {
   // ─────────────────────────────────────────────────────
   en: {
     newImage:   '← New Image',
-    badgeLabel: 'Gemini 2.5 Flash',
+    badgeLabel: 'X.AI',
 
-    heroBadge: '✨ Gemini 2.5 Flash Vision',
+    heroBadge: '✨ X.AI Vision',
     heroLine1: 'Will your post',
     heroLine2: 'go viral?',
     heroSub:   'AI analyzes viral potential, captions & hashtags.',
@@ -210,9 +210,9 @@ export const translations = {
   // ─────────────────────────────────────────────────────
   ru: {
     newImage:   '← Новое фото',
-    badgeLabel: 'Gemini 2.5 Flash',
+    badgeLabel: 'X.AI',
 
-    heroBadge: '✨ Gemini 2.5 Flash Vision',
+    heroBadge: '✨ X.AI Vision',
     heroLine1: 'Станет ли твой пост',
     heroLine2: 'вирусным?',
     heroSub:   'ИИ анализирует вирусный потенциал, подписи и хэштеги.',
