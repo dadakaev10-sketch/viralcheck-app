@@ -55,7 +55,15 @@ function ImageCompareSlider({ before, after, labelBefore = 'Vorher', labelAfter 
   const containerRef = useRef(null);
   const [pos, setPos] = useState(50);
   const [containerW, setContainerW] = useState(0);
+  const [aspect, setAspect] = useState(null); // w/h ratio of the after image
   const dragging = useRef(false);
+
+  // Detect aspect ratio from the after image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setAspect(img.naturalWidth / img.naturalHeight);
+    img.src = after;
+  }, [after]);
 
   // Track container width for the before-image sizing
   useEffect(() => {
@@ -99,43 +107,50 @@ function ImageCompareSlider({ before, after, labelBefore = 'Vorher', labelAfter 
     updatePos(cx);
   };
 
+  // Portrait images: limit width so height stays reasonable
+  // Landscape/square: use full width
+  const isPortrait = aspect !== null && aspect < 0.9;
+  const wrapStyle = isPortrait ? { maxWidth: '65vh', margin: '0 auto' } : {};
+
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full select-none overflow-hidden rounded-2xl border border-[#e8e5f0] bg-black cursor-col-resize"
-      style={{ maxHeight: '75vh' }}
-      onMouseDown={onStart}
-      onTouchStart={onStart}
-    >
-      {/* After image (full, sets container height) */}
-      <img src={after} alt="After" draggable={false}
-        className="block w-full h-auto" />
+    <div style={wrapStyle}>
+      <div
+        ref={containerRef}
+        className="relative w-full select-none overflow-hidden rounded-2xl border border-[#e8e5f0] bg-black cursor-col-resize"
+        style={{ maxHeight: '80vh' }}
+        onMouseDown={onStart}
+        onTouchStart={onStart}
+      >
+        {/* After image (full, sets container height) */}
+        <img src={after} alt="After" draggable={false}
+          className="block w-full h-auto" style={{ maxHeight: '80vh', objectFit: 'contain' }} />
 
-      {/* Before image (clipped from left) */}
-      <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
-        <img src={before} alt="Before" draggable={false}
-          className="block h-full"
-          style={{ width: containerW || '100%', maxWidth: 'none', objectFit: 'cover' }} />
-      </div>
-
-      {/* Divider line */}
-      <div className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none"
-        style={{ left: `${pos}%`, transform: 'translateX(-50%)', boxShadow: '0 0 8px rgba(0,0,0,0.4)' }}>
-        {/* Handle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl border-2 border-violet-500 flex items-center justify-center pointer-events-none">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M5 9L2 9M2 9L4 7M2 9L4 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M13 9L16 9M16 9L14 7M16 9L14 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        {/* Before image (clipped from left) */}
+        <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+          <img src={before} alt="Before" draggable={false}
+            className="block h-full"
+            style={{ width: containerW || '100%', maxWidth: 'none', objectFit: 'cover' }} />
         </div>
-      </div>
 
-      {/* Labels */}
-      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
-        {labelBefore}
-      </div>
-      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
-        {labelAfter}
+        {/* Divider line */}
+        <div className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none"
+          style={{ left: `${pos}%`, transform: 'translateX(-50%)', boxShadow: '0 0 8px rgba(0,0,0,0.4)' }}>
+          {/* Handle */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl border-2 border-violet-500 flex items-center justify-center pointer-events-none">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M5 9L2 9M2 9L4 7M2 9L4 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 9L16 9M16 9L14 7M16 9L14 11" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Labels */}
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
+          {labelBefore}
+        </div>
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 text-white text-xs font-bold backdrop-blur-sm pointer-events-none">
+          {labelAfter}
+        </div>
       </div>
     </div>
   );
