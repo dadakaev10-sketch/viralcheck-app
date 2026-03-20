@@ -461,7 +461,7 @@ function AnalysisTabs({ data, t }) {
 
 // ─── Main Page ────────────────────────────────────────
 export default function Home() {
-  const { user, authLoading, canAnalyze, remaining, signInWithGoogle, signOut, incrementUsage } = useAuth();
+  const { user, authLoading, canAnalyze, remaining, credits, isPremium, signInWithGoogle, signOut, incrementUsage } = useAuth();
   const [lang, setLang] = useState('de');
   const t = translations[lang];
 
@@ -636,9 +636,16 @@ export default function Home() {
           {/* User info */}
           {user && (
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-200">
-                <span className="text-[10px] font-bold text-violet-600">{t.remaining(remaining)}</span>
-              </div>
+              {/* Credits/remaining badge */}
+              {isPremium ? (
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-50 border border-yellow-300">
+                  <span className="text-[10px] font-bold text-yellow-700">{t.creditsLabel(credits)}</span>
+                </div>
+              ) : (
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-200">
+                  <span className="text-[10px] font-bold text-violet-600">{t.remaining(remaining)}</span>
+                </div>
+              )}
               {user.photoURL && (
                 <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full border border-[#e8e5f0]" referrerPolicy="no-referrer" />
               )}
@@ -715,8 +722,10 @@ export default function Home() {
             ) : (
               <>
                 {/* Remaining analyses badge (mobile) */}
-                <div className="sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 border border-violet-200">
-                  <span className="text-xs font-bold text-violet-600">{t.remaining(remaining)}</span>
+                <div className={`sm:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${isPremium ? 'bg-yellow-50 border-yellow-300' : 'bg-violet-50 border-violet-200'}`}>
+                  <span className={`text-xs font-bold ${isPremium ? 'text-yellow-700' : 'text-violet-600'}`}>
+                    {isPremium ? t.creditsLabel(credits) : t.remaining(remaining)}
+                  </span>
                 </div>
 
                 {/* Platform tabs */}
@@ -747,10 +756,16 @@ export default function Home() {
                 {!canAnalyze ? (
                   <div className="w-full bg-gradient-to-br from-violet-50 to-pink-50 border border-violet-200 rounded-2xl p-8 text-center">
                     <div className="text-4xl mb-3">🔒</div>
-                    <h2 className="text-lg font-extrabold text-[#0f0e17] mb-2">{t.limitReached}</h2>
-                    <button className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl text-sm font-bold hover:from-violet-700 hover:to-pink-700 transition-all active:scale-[0.98]">
-                      {t.limitCta}
-                    </button>
+                    <h2 className="text-lg font-extrabold text-[#0f0e17] mb-2">{t.upgradeTitle}</h2>
+                    <p className="text-sm text-[#6b6884] mb-5">{t.upgradeSub}</p>
+                    <a
+                      href={`https://t.me/ViralCheckApp_bot?start=${user?.uid || ''}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full py-3.5 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl text-sm font-bold hover:from-violet-700 hover:to-pink-700 transition-all active:scale-[0.98] text-center">
+                      {t.upgradeBtn}
+                    </a>
+                    <p className="text-[11px] text-[#a09db8] mt-3">{t.upgradeNote}</p>
                   </div>
                 ) : (
                   <>
