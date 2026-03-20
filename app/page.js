@@ -823,10 +823,25 @@ export default function Home() {
                     labelAfter={lang === 'de' ? 'Nachher' : lang === 'en' ? 'After' : 'После'}
                   />
                   <div className="flex gap-2">
-                    <a href={regeneratedImage} download="viralcheck-regenerated.png"
+                    <button onClick={async () => {
+                      try {
+                        const res = await fetch(regeneratedImage);
+                        const blob = await res.blob();
+                        const file = new File([blob], 'viralcheck-regenerated.png', { type: 'image/png' });
+                        if (navigator.canShare?.({ files: [file] })) {
+                          await navigator.share({ files: [file], title: 'ViralCheck' });
+                        } else {
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url; a.download = 'viralcheck-regenerated.png';
+                          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }
+                      } catch (e) { if (e.name !== 'AbortError') console.error(e); }
+                    }}
                       className="flex-1 py-2.5 bg-gradient-to-r from-violet-500 to-violet-700 text-white rounded-xl text-xs font-bold text-center hover:from-violet-600 hover:to-violet-800 transition-all active:scale-95">
-                      {lang === 'de' ? 'Neues Bild speichern' : lang === 'en' ? 'Download new image' : 'Скачать новое'}
-                    </a>
+                      📲 {lang === 'de' ? 'In Fotos speichern' : lang === 'en' ? 'Save to Photos' : 'Сохранить в фото'}
+                    </button>
                     <button onClick={reset}
                       className="px-4 py-2.5 border border-[#e8e5f0] rounded-xl text-xs font-bold text-[#6b6884] hover:border-violet-400 hover:text-violet-600 transition-all active:scale-95">
                       {t.reanalyze}
