@@ -242,7 +242,7 @@ function UploadZone({ onFile, t }) {
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
     >
-      <input ref={inputRef} type="file" accept="image/*" className="hidden"
+      <input ref={inputRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" className="hidden"
         onChange={(e) => { const f = e.target.files[0]; if (f) onFile(f); }} />
       <div className="text-4xl mb-3">📤</div>
       <div className="text-base font-bold text-[#0f0e17] mb-1">{t.uploadTitle}</div>
@@ -525,6 +525,11 @@ export default function Home() {
   const handleDismissBanner = () => setShowInstallBanner(false);
 
   const handleFile = (file) => {
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+      setError('❌ Nur JPEG, PNG oder WebP werden unterstützt. SVG funktioniert nicht.');
+      return;
+    }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setResult(null);
