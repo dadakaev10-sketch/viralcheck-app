@@ -461,7 +461,7 @@ function AnalysisTabs({ data, t }) {
 
 // ─── Main Page ────────────────────────────────────────
 export default function Home() {
-  const { user, authLoading, canAnalyze, remaining, credits, isPremium, signInWithGoogle, signOut, incrementUsage } = useAuth();
+  const { user, authLoading, canAnalyze, remaining, credits, isPremium, signInWithGoogle, signOut, incrementUsage, saveAnalysis, uploadRegeneratedImage, updateAnalysisImage } = useAuth();
   const [lang, setLang] = useState('de');
   const t = translations[lang];
 
@@ -475,6 +475,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [regenerating, setRegenerating] = useState(false);
   const [regeneratedImage, setRegeneratedImage] = useState(null);
+  const [currentAnalysisId, setCurrentAnalysisId] = useState(null);
 
   // PWA install prompt
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -554,6 +555,9 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || 'Analyse fehlgeschlagen');
       setResult(data);
       await incrementUsage();
+      // Save analysis to Firestore
+      const analysisId = await saveAnalysis(data, platform, category);
+      setCurrentAnalysisId(analysisId);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -588,6 +592,11 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Regeneration fehlgeschlagen');
       setRegeneratedImage(data.image);
+      // Upload to Firebase Storage & update Firestore
+      if (currentAnalysisId && data.image) {
+        const url = await uploadRegeneratedImage(data.image, currentAnalysisId);
+        if (url) await updateAnalysisImage(currentAnalysisId, url);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -601,6 +610,7 @@ export default function Home() {
     setImagePreview(null);
     setError(null);
     setRegeneratedImage(null);
+    setCurrentAnalysisId(null);
   };
 
   return (

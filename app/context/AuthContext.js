@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { auth, db, storage } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 const FREE_LIMIT = 3;
@@ -56,19 +57,82 @@ export function AuthProvider({ children }) {
 
   const incrementUsage = async () => {
     if (!user) return;
-    const ref = doc(db, 'users', user.uid);
+    const userRef = doc(db, 'users', user.uid);
     if (credits > 0) {
-      // Use a credit first
-      await updateDoc(ref, { credits: increment(-1) });
+      await updateDoc(userRef, { credits: increment(-1) });
       setCredits((c) => c - 1);
     } else {
-      // Use free quota
-      await updateDoc(ref, { analysisCount: increment(1) });
+      await updateDoc(userRef, { analysisCount: increment(1) });
       setAnalysisCount((c) => c + 1);
     }
   };
 
-  // Can analyze if has credits OR free quota remaining
+  // Upload regenerated image (base64 data URL) to Firebase Storage
+  // Returns download URL or null on failure
+  const uploadRegeneratedImage = async (base64DataUrl, analysisId) => {
+    if (!user || !base64DataUrl) return null;
+    try {
+      const storageRef = ref(storage, `users/${user.uid}/analyses/${analysisId}/regenerated.png`);
+      await uploadString(storageRef, base64DataUrl, 'data_url');
+      return await getDownloadURL(storageRef);
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      return null;
+    }
+  };
+
+  // Save analysis result to Firestore, optionally with a regenerated image URL
+  const saveAnalysis = async (result, platform, category, regeneratedImageUrl = null) => {
+    if (!user || !result) return null;
+    try {
+      const analysesRef = collection(db, 'users', user.uid, 'analyses');
+      const docRef = await addDoc(analysesRef, {
+        platform,
+        category,
+        viralScore: result.viralScore ?? 0,
+        scores: result.scores ?? {},
+        captions: result.captions ?? {},
+        hashtags: result.hashtags ?? {},
+        wasGutIst: result.wasGutIst ?? [],
+        wasVerbessern: result.wasVerbessern ?? [],
+        bestPostingTime: result.bestPostingTime ?? '',
+        trendWindow: result.trendWindow ?? '',
+        imageContent: result.imageContent ?? '',
+        regeneratedImageUrl,
+        createdAt: serverTimestamp(),
+      });
+      return docRef.id;
+    } catch (err) {
+      console.error('saveAnalysis failed:', err);
+      return null;
+    }
+  };
+
+  // Update an existing analysis with regenerated image URL
+  const updateAnalysisImage = async (analysisId, regeneratedImageUrl) => {
+    if (!user || !analysisId) return;
+    try {
+      const analysisRef = doc(db, 'users', user.uid, 'analyses', analysisId);
+      await updateDoc(analysisRef, { regeneratedImageUrl });
+    } catch (err) {
+      console.error('updateAnalysisImage failed:', err);
+    }
+  };
+
+  // Load last N analyses for the history view
+  const loadAnalyses = async (count = 20) => {
+    if (!user) return [];
+    try {
+      const analysesRef = collection(db, 'users', user.uid, 'analyses');
+      const q = query(analysesRef, orderBy('createdAt', 'desc'), limit(count));
+      const snap = await getDocs(q);
+      return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (err) {
+      console.error('loadAnalyses failed:', err);
+      return [];
+    }
+  };
+
   const canAnalyze = credits > 0 || analysisCount < FREE_LIMIT;
   const freeRemaining = Math.max(0, FREE_LIMIT - analysisCount);
   const remaining = credits > 0 ? credits : freeRemaining;
@@ -78,6 +142,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, authLoading, analysisCount, credits, canAnalyze, remaining, isPremium,
       signInWithGoogle, signOut: signOutUser, incrementUsage,
+      saveAnalysis, uploadRegeneratedImage, updateAnalysisImage, loadAnalyses,
     }}>
       {children}
     </AuthContext.Provider>
