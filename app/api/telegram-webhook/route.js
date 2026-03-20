@@ -2,7 +2,7 @@ import { doc, updateDoc, increment, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CREDITS_PER_PURCHASE = 10;
+const CREDITS_PER_PURCHASE = 20;
 
 // Answer Telegram pre_checkout_query so payment can proceed
 async function answerPreCheckout(queryId, ok, errorMessage) {
@@ -47,11 +47,11 @@ export async function POST(request) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          title: '✨ ViralCheck – 10 Analysen',
-          description: `Kaufe 10 weitere Analysen für ViralCheck. Sofort freigeschaltet!`,
+          title: '✨ ViralCheck – 20 Analysen',
+          description: `Kaufe 20 weitere Analysen für ViralCheck. Sofort freigeschaltet!`,
           payload: uid, // Firebase UID als payload → verknüpft Zahlung mit User
           currency: 'XTR', // Telegram Stars
-          prices: [{ label: '10 Analysen', amount: 100 }], // 100 Stars
+          prices: [{ label: '20 Analysen', amount: 100 }], // 100 Stars
           provider_token: '', // Leer bei Stars
         }),
       });
