@@ -115,8 +115,8 @@ export const translations = {
     limitReached:  'Du hast deine 3 kostenlosen Analysen aufgebraucht.',
     limitCta:      'Schalte 10 weitere Versuche frei – ca. 1 €',
     upgradeTitle:  '🔒 Limit erreicht',
-    upgradeSub:    'Kaufe 10 weitere Analysen für nur 50 Telegram Stars',
-    upgradeBtn:    '⭐ 10 Analysen kaufen (50 Stars)',
+    upgradeSub:    'Kaufe 10 weitere Analysen für nur 100 Telegram Stars',
+    upgradeBtn:    '⭐ 10 Analysen kaufen (100 Stars)',
     upgradeNote:   'Zahlung über Telegram Stars · sofort freigeschaltet',
     creditsLabel:  (n) => `⭐ ${n} Credits`,
 
@@ -228,8 +228,8 @@ export const translations = {
     limitReached:  'You\'ve used all 3 free analyses.',
     limitCta:      'Unlock 10 more analyses – approx. €1',
     upgradeTitle:  '🔒 Limit reached',
-    upgradeSub:    'Buy 10 more analyses for just 50 Telegram Stars',
-    upgradeBtn:    '⭐ Buy 10 Analyses (50 Stars)',
+    upgradeSub:    'Buy 10 more analyses for just 100 Telegram Stars',
+    upgradeBtn:    '⭐ Buy 10 Analyses (100 Stars)',
     upgradeNote:   'Payment via Telegram Stars · unlocked instantly',
     creditsLabel:  (n) => `⭐ ${n} Credits`,
 
@@ -339,8 +339,8 @@ export const translations = {
     limitReached:  'Вы использовали все 3 бесплатных анализа.',
     limitCta:      'Разблокируй 10 попыток – примерно 1 €',
     upgradeTitle:  '🔒 Лимит исчерпан',
-    upgradeSub:    'Купите 10 анализов всего за 50 Telegram Stars',
-    upgradeBtn:    '⭐ Купить 10 анализов (50 Stars)',
+    upgradeSub:    'Купите 10 анализов всего за 100 Telegram Stars',
+    upgradeBtn:    '⭐ Купить 10 анализов (100 Stars)',
     upgradeNote:   'Оплата через Telegram Stars · активируется мгновенно',
     creditsLabel:  (n) => `⭐ ${n} кредитов`,
 

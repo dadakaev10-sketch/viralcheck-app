@@ -51,7 +51,7 @@ export async function POST(request) {
           description: `Kaufe 10 weitere Analysen für ViralCheck. Sofort freigeschaltet!`,
           payload: uid, // Firebase UID als payload → verknüpft Zahlung mit User
           currency: 'XTR', // Telegram Stars
-          prices: [{ label: '10 Analysen', amount: 50 }], // 50 Stars
+          prices: [{ label: '10 Analysen', amount: 100 }], // 100 Stars
           provider_token: '', // Leer bei Stars
         }),
       });
