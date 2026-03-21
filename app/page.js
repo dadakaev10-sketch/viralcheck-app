@@ -828,30 +828,6 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* Platform tabs */}
-                <div className="flex bg-white border border-[#e8e5f0] rounded-xl p-1 gap-1 w-full">
-                  {PLATFORMS.map((p) => (
-                    <button key={p} onClick={() => setPlatform(p)}
-                      className={`flex-1 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap px-1
-                        ${platform === p ? 'bg-violet-600 text-white shadow-sm' : 'text-[#6b6884]'}`}>
-                      {p}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Category pills */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {t.categories.map(({ label, value }) => (
-                    <button key={value} onClick={() => setCategory(value)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active:scale-95
-                        ${category === value
-                          ? 'bg-violet-100 border-violet-400 text-violet-700'
-                          : 'bg-white border-[#e8e5f0] text-[#6b6884]'}`}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Limit reached */}
                 {!canAnalyze ? (
                   <div className="w-full bg-gradient-to-br from-violet-50 to-pink-50 border border-violet-200 rounded-2xl p-8 text-center">
