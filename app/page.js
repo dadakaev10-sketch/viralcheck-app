@@ -29,12 +29,12 @@ const CATEGORY_ICONS = {
   ),
   Lifestyle: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
     </svg>
   ),
   Fitness: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+      <path d="M6 4v6"/><path d="M18 4v6"/><path d="M3 10h4"/><path d="M17 10h4"/><rect x="7" y="7" width="10" height="6" rx="1"/>
     </svg>
   ),
   Travel: (
@@ -44,7 +44,7 @@ const CATEGORY_ICONS = {
   ),
   Business: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12h.01"/>
     </svg>
   ),
   Luxury: (
@@ -54,17 +54,17 @@ const CATEGORY_ICONS = {
   ),
   Бизнес: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12h.01"/>
     </svg>
   ),
   Лайфстайл: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
     </svg>
   ),
   Фитнес: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+      <path d="M6 4v6"/><path d="M18 4v6"/><path d="M3 10h4"/><path d="M17 10h4"/><rect x="7" y="7" width="10" height="6" rx="1"/>
     </svg>
   ),
   Путешествия: (
@@ -870,10 +870,10 @@ export default function Home() {
                           {!imagePreview ? (
                             <UploadZone onFile={handleFile} t={t} />
                           ) : (
-                            <div className="relative rounded-xl overflow-hidden border border-[#e8e5f0]">
-                              <img src={imagePreview} alt="Preview" className="w-full max-h-[40vh] object-contain bg-[#f5f4f8]" />
+                            <div className="relative rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]">
+                              <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[50vh] object-contain block mx-auto" />
                               <button onClick={() => { setImageFile(null); setImagePreview(null); }}
-                                className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center hover:bg-black/70">
+                                className="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full text-base flex items-center justify-center hover:bg-black/80 font-bold">
                                 ×
                               </button>
                               <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full truncate max-w-[70%]">

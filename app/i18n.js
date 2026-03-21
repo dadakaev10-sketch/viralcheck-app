@@ -12,13 +12,13 @@ export const translations = {
 
     // Categories
     categories: [
-      { label: '☕ Food',       value: 'Food' },
-      { label: '👗 Fashion',    value: 'Fashion' },
-      { label: '🌿 Lifestyle',  value: 'Lifestyle' },
-      { label: '💪 Fitness',    value: 'Fitness' },
-      { label: '✈️ Travel',     value: 'Travel' },
-      { label: '💼 Business',   value: 'Business' },
-      { label: '✨ Luxury',     value: 'Luxury' },
+      { label: 'Food',       value: 'Food' },
+      { label: 'Fashion',    value: 'Fashion' },
+      { label: 'Lifestyle',  value: 'Lifestyle' },
+      { label: 'Fitness',    value: 'Fitness' },
+      { label: 'Travel',     value: 'Travel' },
+      { label: 'Business',   value: 'Business' },
+      { label: 'Luxury',     value: 'Luxury' },
     ],
 
     // Upload zone
@@ -138,13 +138,13 @@ export const translations = {
     heroSub:   'AI analyzes viral potential, captions & hashtags.',
 
     categories: [
-      { label: '☕ Food',       value: 'Food' },
-      { label: '👗 Fashion',    value: 'Fashion' },
-      { label: '🌿 Lifestyle',  value: 'Lifestyle' },
-      { label: '💪 Fitness',    value: 'Fitness' },
-      { label: '✈️ Travel',     value: 'Travel' },
-      { label: '💼 Business',   value: 'Business' },
-      { label: '✨ Luxury',     value: 'Luxury' },
+      { label: 'Food',       value: 'Food' },
+      { label: 'Fashion',    value: 'Fashion' },
+      { label: 'Lifestyle',  value: 'Lifestyle' },
+      { label: 'Fitness',    value: 'Fitness' },
+      { label: 'Travel',     value: 'Travel' },
+      { label: 'Business',   value: 'Business' },
+      { label: 'Luxury',     value: 'Luxury' },
     ],
 
     uploadTitle: 'Select image',
@@ -250,12 +250,13 @@ export const translations = {
     heroSub:   'ИИ анализирует вирусный потенциал, подписи и хэштеги.',
 
     categories: [
-      { label: '☕ Еда',          value: 'Food' },
-      { label: '👗 Мода',         value: 'Fashion' },
-      { label: '🌿 Лайфстайл',    value: 'Lifestyle' },
-      { label: '💪 Фитнес',       value: 'Fitness' },
-      { label: '✈️ Путешествия',  value: 'Travel' },
-      { label: '💼 Бизнес',       value: 'Business' },
+      { label: 'Еда',          value: 'Food' },
+      { label: 'Мода',         value: 'Fashion' },
+      { label: 'Лайфстайл',    value: 'Lifestyle' },
+      { label: 'Фитнес',       value: 'Fitness' },
+      { label: 'Путешествия',  value: 'Travel' },
+      { label: 'Бизнес',       value: 'Business' },
+      { label: 'Люкс',         value: 'Luxury' },
     ],
 
     uploadTitle: 'Выберите изображение',
