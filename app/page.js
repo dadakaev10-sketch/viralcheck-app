@@ -1004,6 +1004,7 @@ export default function Home() {
                       </Step>
                     </Stepper>
                   </div>
+                )}
 
               </>
             )}
