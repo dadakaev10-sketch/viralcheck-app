@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "me.viralcheck.app",
+    "sha256_cert_fingerprints": [
+      "83:67:67:A1:69:28:22:06:35:95:F8:15:6C:82:DB:BA:A7:4D:D4:83:5F:CC:D1:AC:73:05:E1:C5:4F:78:CC:E1"
+    ]
+  }
+}]
