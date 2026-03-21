@@ -4,7 +4,8 @@
     "namespace": "android_app",
     "package_name": "me.viralcheck.app",
     "sha256_cert_fingerprints": [
-      "83:67:67:A1:69:28:22:06:35:95:F8:15:6C:82:DB:BA:A7:4D:D4:83:5F:CC:D1:AC:73:05:E1:C5:4F:78:CC:E1"
+      "83:67:67:A1:69:28:22:06:35:95:F8:15:6C:82:DB:BA:A7:4D:D4:83:5F:CC:D1:AC:73:05:E1:C5:4F:78:CC:E1",
+      "F6:26:76:6C:DD:CD:CD:9E:62:F5:D3:58:A1:37:56:3B:76:BC:C1:B1:49:7B:7C:79:E4:53:3C:12:92:F9:77:C9"
     ]
   }
 }]
