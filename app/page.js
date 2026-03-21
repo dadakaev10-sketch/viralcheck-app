@@ -279,10 +279,7 @@ function PWAInstallBanner({ onInstall, onDismiss, t }) {
         className="w-full max-w-sm bg-white border border-[#e8e5f0] rounded-2xl shadow-2xl p-4 flex items-center gap-3 pointer-events-auto fade-up"
         style={{ boxShadow: '0 8px 32px rgba(124,58,237,0.18)' }}
       >
-        <div
-          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)' }}
-        >✨</div>
+        <img src="/logo.svg" alt="ViralCheck" className="w-12 h-12 rounded-xl flex-shrink-0 shadow-sm" />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-extrabold text-[#0f0e17] leading-tight">{t.pwaTitle}</div>
           <div className="text-xs text-[#6b6884] mt-0.5">{t.pwaSub}</div>
@@ -710,8 +707,7 @@ export default function Home() {
       {/* ── Topbar ── */}
       <header className="bg-white border-b border-[#e8e5f0] px-4 sm:px-8 h-14 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2 text-base font-extrabold text-[#0f0e17] tracking-tight">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)' }}>✨</div>
+          <img src="/logo.svg" alt="ViralCheck" className="w-7 h-7 rounded-lg flex-shrink-0" />
           Viral<span className="text-violet-600">Check</span>
         </div>
 

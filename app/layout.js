@@ -37,9 +37,8 @@ export default function RootLayout({ children }) {
         />
 
         {/* Icons */}
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        {/* iOS requires a raster PNG for apple-touch-icon; SVG is ignored */}
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+        <link rel="apple-touch-icon" href="/logo.svg" />
       </head>
       <body><AuthProvider>{children}</AuthProvider><Analytics /><SpeedInsights /></body>
     </html>
