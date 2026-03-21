@@ -945,22 +945,21 @@ export default function Home() {
 
                       {/* ── Step 3: Start ── */}
                       <Step>
-                        <div className="pb-2 flex flex-col items-center text-center gap-3">
+                        <div className="pb-2 flex flex-col gap-3">
                           {imagePreview && (
-                            <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-violet-200 shadow-sm flex-shrink-0">
-                              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="w-full rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]" style={{ height: '180px' }}>
+                              <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                             </div>
                           )}
                           <div>
-                            <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
-                              {lang === 'de' ? '🚀 Alles bereit!' : lang === 'ru' ? '🚀 Всё готово!' : '🚀 Ready to go!'}
+                            <h2 className="text-base font-extrabold text-[#0f0e17] mb-0.5">
+                              {lang === 'de' ? 'Alles bereit!' : lang === 'ru' ? 'Всё готово!' : 'Ready to go!'}
                             </h2>
-                            <p className="text-xs text-[#6b6884]">
-                              {platform} · {category}
-                              {customPurpose && <><br /><span className="italic">„{customPurpose}"</span></>}
-                            </p>
+                            {customPurpose && (
+                              <p className="text-xs text-[#6b6884] italic">„{customPurpose}"</p>
+                            )}
                           </div>
-                          <div className="w-full bg-[#f5f4f8] rounded-xl p-3 text-left text-xs text-[#6b6884]">
+                          <div className="w-full bg-[#f5f4f8] rounded-xl p-3 text-xs text-[#6b6884]">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-green-500">✓</span>
                               <span>{lang === 'de' ? 'Bild hochgeladen' : lang === 'ru' ? 'Фото загружено' : 'Photo uploaded'}</span>
@@ -974,7 +973,7 @@ export default function Home() {
                               <span>{lang === 'de' ? `Plattform: ${platform}` : lang === 'ru' ? `Платформа: ${platform}` : `Platform: ${platform}`}</span>
                             </div>
                           </div>
-                          <p className="text-[11px] text-[#a09db8]">
+                          <p className="text-[11px] text-[#a09db8] text-center">
                             {lang === 'de' ? `Noch ${remaining} ${remaining === 1 ? 'Analyse' : 'Analysen'} übrig` : lang === 'ru' ? `Осталось ${remaining} анализов` : `${remaining} ${remaining === 1 ? 'analysis' : 'analyses'} left`}
                           </p>
                         </div>
