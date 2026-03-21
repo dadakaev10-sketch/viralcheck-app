@@ -2,7 +2,7 @@ export const maxDuration = 120;
 
 export async function POST(request) {
   try {
-    const { improvements, imageContent, imageBase64, imageMimeType, platform, category } = await request.json();
+    const { improvements, imageContent, imageBase64, imageMimeType, platform, category, customPurpose } = await request.json();
 
     if (!improvements || !Array.isArray(improvements) || improvements.length === 0) {
       return Response.json({ error: 'Keine Verbesserungsvorschläge gefunden.' }, { status: 400 });
@@ -68,7 +68,10 @@ STRICT RULES - DO NOT CHANGE:
 - Do NOT add or remove any objects or people
 - Do NOT change the setting or environment
 
-This must look like the SAME photo, just professionally enhanced for ${category} content. Platform: ${platform}`;
+Platform: ${platform}. ${platform === 'TikTok' ? 'Optimize for TikTok: vertical format feel, bold and energetic, high contrast, eye-catching.' : 'Optimize for Instagram: polished, aesthetic, grid-worthy, clean and aspirational.'}
+${customPurpose ? `User goal: "${customPurpose}" — enhance the image to support this goal visually.` : ''}
+
+This must look like the SAME photo, just professionally enhanced for ${category} content on ${platform}.`;
 
     // Use /v1/images/edits endpoint to edit the original image directly
     const requestBody = {

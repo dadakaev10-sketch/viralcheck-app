@@ -30,10 +30,16 @@ export async function POST(request) {
     const base64 = Buffer.from(bytes).toString('base64');
     const mimeType = imageFile.type || 'image/jpeg';
 
+    const platformGuide = platform === 'TikTok'
+      ? 'TikTok: prioritize strong hook in first 2 seconds, trending sounds relevance, vertical video feel, fast-paced energy, Gen-Z tone in captions.'
+      : 'Instagram: prioritize visual aesthetics, grid-worthy composition, story appeal, polished look, aspirational tone in captions.';
+
     const prompt = `You are a social media expert analyzing images for viral potential.
 ${langInstruction}
 
-Analyze this image for the platform "${platform}" in the category "${category}".${customPurpose ? `\nAdditional context provided by the user: "${customPurpose}". Take this into account for all recommendations, captions, hashtags, and improvements.` : ''}
+Platform: ${platform}. ${platformGuide}
+Category: ${category}.${customPurpose ? `\nUser's specific goal: "${customPurpose}". All captions, hashtags, and improvement tips MUST be tailored to this goal.` : ''}
+
 Reply ONLY with valid JSON — no markdown code fences, no explanations before or after.
 
 Required JSON format (all fields mandatory):
@@ -49,21 +55,21 @@ Required JSON format (all fields mandatory):
     "engagementPotenzial": <0-100>
   },
   "wasGutIst": [
-    "<specific positive point 1>",
-    "<specific positive point 2>",
-    "<specific positive point 3>"
+    "<specific positive point 1 for ${platform}>",
+    "<specific positive point 2 for ${platform}>",
+    "<specific positive point 3 for ${platform}>"
   ],
   "wasVerbessern": [
-    "<specific improvement tip 1>",
-    "<specific improvement tip 2>",
-    "<specific improvement tip 3>"
+    "<specific improvement tip 1 for ${platform}>",
+    "<specific improvement tip 2 for ${platform}>",
+    "<specific improvement tip 3 for ${platform}>"
   ],
-  "bestPostingTime": "<e.g. Tue–Thu, 6–8 PM>",
-  "trendWindow": "<current trend + change in %, e.g. 'Morning Routine ↑ 23%'>",
+  "bestPostingTime": "<best time specifically for ${platform}, e.g. Mon–Fri, 7–9 PM>",
+  "trendWindow": "<current trend relevant to ${platform} + change in %, e.g. 'Morning Routine ↑ 23%'>",
   "captions": {
-    "locker": "<short casual caption with fitting emojis, max 100 chars>",
-    "storytelling": "<emotional caption with story, 150-250 chars>",
-    "cta": "<caption with clear call-to-action and question to audience, 180-280 chars>"
+    "locker": "<short casual caption with fitting emojis, max 100 chars, ${platform} style>",
+    "storytelling": "<emotional caption with story, 150-250 chars, ${platform} style>",
+    "cta": "<caption with clear call-to-action and question to audience, 180-280 chars, ${platform} style>"
   },
   "hashtags": {
     "trending": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"],

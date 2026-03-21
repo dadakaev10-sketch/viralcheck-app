@@ -84,7 +84,7 @@ const CATEGORY_ICONS = {
   ),
 };
 
-const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
+const PLATFORMS = ['Instagram', 'TikTok'];
 
 // ─── Safe localStorage helpers (iOS Safari Private Mode throws on access) ──────
 function getLang() {
@@ -545,7 +545,7 @@ export default function Home() {
   const [lang, setLang] = useState('de');
   const t = translations[lang];
 
-  const [platform, setPlatform] = useState('Instagram Post');
+  const [platform, setPlatform] = useState('Instagram');
   const [category, setCategory] = useState('Lifestyle');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -675,6 +675,7 @@ export default function Home() {
           imageMimeType: imageFile.type || 'image/jpeg',
           platform,
           category,
+          customPurpose,
         }),
       });
       const data = await res.json();
