@@ -1,6 +1,7 @@
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 // Next.js 15 App Router: viewport MUST be exported separately.
 // Manually adding <meta name="viewport"> in <head> creates a DUPLICATE tag
@@ -40,7 +41,7 @@ export default function RootLayout({ children }) {
         {/* iOS requires a raster PNG for apple-touch-icon; SVG is ignored */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body><AuthProvider>{children}</AuthProvider><Analytics /></body>
+      <body><AuthProvider>{children}</AuthProvider><Analytics /><SpeedInsights /></body>
     </html>
   );
 }
