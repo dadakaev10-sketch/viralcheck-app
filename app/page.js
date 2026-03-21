@@ -29,12 +29,12 @@ const CATEGORY_ICONS = {
   ),
   Lifestyle: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      <circle cx="12" cy="5" r="1.5"/><path d="M12 7v5"/><path d="M9 10l-2 4"/><path d="M15 10l2 4"/><path d="M9 22l3-5 3 5"/>
     </svg>
   ),
   Fitness: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 4v6"/><path d="M18 4v6"/><path d="M3 10h4"/><path d="M17 10h4"/><rect x="7" y="7" width="10" height="6" rx="1"/>
+      <path d="M6 8h12"/><path d="M6 16h12"/><rect x="2" y="6" width="4" height="12" rx="1"/><rect x="18" y="6" width="4" height="12" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/>
     </svg>
   ),
   Travel: (
@@ -59,12 +59,12 @@ const CATEGORY_ICONS = {
   ),
   Лайфстайл: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      <circle cx="12" cy="5" r="1.5"/><path d="M12 7v5"/><path d="M9 10l-2 4"/><path d="M15 10l2 4"/><path d="M9 22l3-5 3 5"/>
     </svg>
   ),
   Фитнес: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 4v6"/><path d="M18 4v6"/><path d="M3 10h4"/><path d="M17 10h4"/><rect x="7" y="7" width="10" height="6" rx="1"/>
+      <path d="M6 8h12"/><path d="M6 16h12"/><rect x="2" y="6" width="4" height="12" rx="1"/><rect x="18" y="6" width="4" height="12" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/>
     </svg>
   ),
   Путешествия: (
@@ -863,7 +863,7 @@ export default function Home() {
                       <Step>
                         <div className="pb-2">
                           <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
-                            {lang === 'de' ? '📸 Foto hochladen' : lang === 'ru' ? '📸 Загрузите фото' : '📸 Upload photo'}
+                            {lang === 'de' ? 'Foto hochladen' : lang === 'ru' ? 'Загрузите фото' : 'Upload photo'}
                           </h2>
                           <p className="text-xs text-[#6b6884] mb-4">
                             {lang === 'de' ? 'JPEG, PNG oder WebP · max. 10 MB' : lang === 'ru' ? 'JPEG, PNG или WebP · макс. 10 МБ' : 'JPEG, PNG or WebP · max 10 MB'}
@@ -871,8 +871,8 @@ export default function Home() {
                           {!imagePreview ? (
                             <UploadZone onFile={handleFile} t={t} />
                           ) : (
-                            <div className="relative rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]">
-                              <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[50vh] object-contain block mx-auto" />
+                            <div className="relative rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]" style={{ height: '220px' }}>
+                              <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                               <button onClick={() => { setImageFile(null); setImagePreview(null); }}
                                 className="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full text-base flex items-center justify-center hover:bg-black/80 font-bold">
                                 ×
@@ -889,7 +889,7 @@ export default function Home() {
                       <Step>
                         <div className="pb-2">
                           <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
-                            {lang === 'de' ? '🎨 Stil wählen' : lang === 'ru' ? '🎨 Выберите стиль' : '🎨 Choose style'}
+                            {lang === 'de' ? 'Stil wählen' : lang === 'ru' ? 'Выберите стиль' : 'Choose style'}
                           </h2>
                           <p className="text-xs text-[#6b6884] mb-4">
                             {lang === 'de' ? 'Für welchen Bereich ist dein Post?' : lang === 'ru' ? 'Для какой ниши твой пост?' : 'What niche is your post for?'}
@@ -930,7 +930,7 @@ export default function Home() {
 
                           {/* Custom purpose */}
                           <p className="text-xs font-bold text-[#3d3a52] mb-2">
-                            {lang === 'de' ? '✏️ Eigenen Zweck hinzufügen (optional)' : lang === 'ru' ? '✏️ Добавить свою цель (необязательно)' : '✏️ Add custom purpose (optional)'}
+                            {lang === 'de' ? 'Eigenen Zweck hinzufügen (optional)' : lang === 'ru' ? 'Добавить свою цель (необязательно)' : 'Add custom purpose (optional)'}
                           </p>
                           <input
                             type="text"
