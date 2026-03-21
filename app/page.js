@@ -29,12 +29,12 @@ const CATEGORY_ICONS = {
   ),
   Lifestyle: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="1.5"/><path d="M12 7v5"/><path d="M9 10l-2 4"/><path d="M15 10l2 4"/><path d="M9 22l3-5 3 5"/>
+      <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
     </svg>
   ),
   Fitness: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8h12"/><path d="M6 16h12"/><rect x="2" y="6" width="4" height="12" rx="1"/><rect x="18" y="6" width="4" height="12" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/>
+      <path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h3v5H3z"/><path d="M18 9.5h3v5h-3z"/><path d="M9 6.5v11"/><path d="M15 6.5v11"/>
     </svg>
   ),
   Travel: (
@@ -44,7 +44,7 @@ const CATEGORY_ICONS = {
   ),
   Business: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12h.01"/>
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
     </svg>
   ),
   Luxury: (
@@ -54,17 +54,17 @@ const CATEGORY_ICONS = {
   ),
   Бизнес: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M12 12h.01"/>
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
     </svg>
   ),
   Лайфстайл: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="1.5"/><path d="M12 7v5"/><path d="M9 10l-2 4"/><path d="M15 10l2 4"/><path d="M9 22l3-5 3 5"/>
+      <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
     </svg>
   ),
   Фитнес: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8h12"/><path d="M6 16h12"/><rect x="2" y="6" width="4" height="12" rx="1"/><rect x="18" y="6" width="4" height="12" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/>
+      <path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M3 9.5h3v5H3z"/><path d="M18 9.5h3v5h-3z"/><path d="M9 6.5v11"/><path d="M15 6.5v11"/>
     </svg>
   ),
   Путешествия: (
@@ -746,9 +746,13 @@ export default function Home() {
               {user.photoURL && (
                 <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full border border-[#e8e5f0]" referrerPolicy="no-referrer" />
               )}
-              <button onClick={signOut}
-                className="text-[10px] sm:text-xs text-[#6b6884] hover:text-red-500 font-semibold transition-colors">
-                {t.logout}
+              <button onClick={signOut} title={t.logout}
+                className="text-[#6b6884] hover:text-red-500 transition-colors p-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
               </button>
             </div>
           )}
@@ -943,8 +947,8 @@ export default function Home() {
                       <Step>
                         <div className="pb-2 flex flex-col gap-3">
                           {imagePreview && (
-                            <div className="w-full rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]" style={{ height: '180px' }}>
-                              <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
+                            <div className="w-full rounded-xl overflow-hidden border border-[#e8e5f0] bg-[#f5f4f8]" style={{ height: '240px' }}>
+                              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                             </div>
                           )}
                           <div>
