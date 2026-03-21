@@ -1,0 +1,130 @@
+.vc-stepper-outer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.vc-step-indicator-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.vc-step-content-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.vc-step-inner {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.vc-footer {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.vc-footer-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.vc-footer-nav.spread {
+  justify-content: space-between;
+}
+
+.vc-back-btn {
+  transition: all 250ms;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: #6b6884;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #e8e5f0;
+}
+.vc-back-btn:hover { color: #3d3a52; background: #f5f4f8; }
+
+.vc-next-btn {
+  transition: all 250ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.5rem 1.25rem;
+  cursor: pointer;
+  border: none;
+}
+.vc-next-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.vc-next-btn:not(:disabled):hover { opacity: 0.9; }
+.vc-next-btn:not(:disabled):active { transform: scale(0.97); }
+
+/* Step indicator */
+.vc-step-indicator {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.vc-step-indicator-inner {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.3s;
+}
+
+.vc-step-indicator-inner.inactive {
+  background: #e8e5f0;
+  color: #9896ab;
+}
+.vc-step-indicator-inner.active {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+}
+.vc-step-indicator-inner.complete {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.vc-step-connector {
+  position: relative;
+  margin: 0 0.5rem;
+  height: 2px;
+  flex: 1;
+  border-radius: 2px;
+  background: #e8e5f0;
+  overflow: hidden;
+}
+
+.vc-step-connector-fill {
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #ec4899);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.vc-step-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 4px;
+  text-align: center;
+  white-space: nowrap;
+}

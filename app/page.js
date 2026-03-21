@@ -3,6 +3,86 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { translations } from './i18n';
 import { useAuth } from './context/AuthContext';
+import Stepper, { Step } from './components/Stepper';
+
+// ─── Category SVG icons ────────────────────────────────
+const CATEGORY_ICONS = {
+  Food: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15a3 3 0 01-3 3H9l-1 3H5l-1-3"/><path d="M21 6c0-2-1-4-3-4s-3 2-3 4 1 3 3 3v12"/>
+    </svg>
+  ),
+  Moda: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
+    </svg>
+  ),
+  Mode: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
+    </svg>
+  ),
+  Fashion: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
+    </svg>
+  ),
+  Lifestyle: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  ),
+  Fitness: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+    </svg>
+  ),
+  Travel: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2a.5.5 0 00-.5.2l-.9.9a.5.5 0 000 .7l5 3.4-2.8 2.8-1.5-.4a.5.5 0 00-.5.1l-.5.5a.5.5 0 000 .7l2 2 2 2a.5.5 0 00.7 0l.5-.5a.5.5 0 00.1-.5l-.4-1.5 2.8-2.8 3.4 5a.5.5 0 00.7 0l.9-.9a.5.5 0 00.2-.5z"/>
+    </svg>
+  ),
+  Business: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+    </svg>
+  ),
+  Luxury: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  Бизнес: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+    </svg>
+  ),
+  Лайфстайл: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  ),
+  Фитнес: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+    </svg>
+  ),
+  Путешествия: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2a.5.5 0 00-.5.2l-.9.9a.5.5 0 000 .7l5 3.4-2.8 2.8-1.5-.4a.5.5 0 00-.5.1l-.5.5a.5.5 0 000 .7l2 2 2 2a.5.5 0 00.7 0l.5-.5a.5.5 0 00.1-.5l-.4-1.5 2.8-2.8 3.4 5a.5.5 0 00.7 0l.9-.9a.5.5 0 00.2-.5z"/>
+    </svg>
+  ),
+  Еда: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15a3 3 0 01-3 3H9l-1 3H5l-1-3"/><path d="M21 6c0-2-1-4-3-4s-3 2-3 4 1 3 3 3v12"/>
+    </svg>
+  ),
+  Мода: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/>
+    </svg>
+  ),
+};
 
 const PLATFORMS = ['Instagram Post', 'Story', 'TikTok', 'Reels'];
 
@@ -476,6 +556,8 @@ export default function Home() {
   const [regenerating, setRegenerating] = useState(false);
   const [regeneratedImage, setRegeneratedImage] = useState(null);
   const [currentAnalysisId, setCurrentAnalysisId] = useState(null);
+  const [customPurpose, setCustomPurpose] = useState('');
+  const [stepperStep, setStepperStep] = useState(1);
 
   // PWA install prompt
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -554,6 +636,7 @@ export default function Home() {
       fd.append('platform', platform);
       fd.append('category', category);
       fd.append('language', lang);
+      if (customPurpose) fd.append('customPurpose', customPurpose);
       const res = await fetch('/api/analyze', { method: 'POST', body: fd });
       const data = await res.json();
       stepTimers.forEach(clearTimeout);
@@ -616,6 +699,8 @@ export default function Home() {
     setError(null);
     setRegeneratedImage(null);
     setCurrentAnalysisId(null);
+    setCustomPurpose('');
+    setStepperStep(1);
   };
 
   return (
@@ -783,31 +868,142 @@ export default function Home() {
                     <p className="text-[11px] text-[#a09db8] mt-3">{t.upgradeNote}</p>
                   </div>
                 ) : (
-                  <>
-                    {/* Upload / Preview */}
-                    {!imagePreview ? (
-                      <UploadZone onFile={handleFile} t={t} />
-                    ) : (
-                      <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl overflow-hidden shadow-sm">
-                        <div className="relative">
-                          <img src={imagePreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
-                          <button onClick={() => { setImageFile(null); setImagePreview(null); }}
-                            className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center">
-                            ×
-                          </button>
+                  <div className="w-full bg-white border border-[#e8e5f0] rounded-2xl shadow-sm overflow-hidden">
+                    <Stepper
+                      initialStep={stepperStep}
+                      onStepChange={setStepperStep}
+                      onFinalStepCompleted={handleAnalyze}
+                      backButtonText={lang === 'de' ? 'Zurück' : lang === 'ru' ? 'Назад' : 'Back'}
+                      nextButtonText={lang === 'de' ? 'Weiter' : lang === 'ru' ? 'Далее' : 'Next'}
+                      nextDisabled={stepperStep === 1 && !imageFile}
+                      stepLabels={
+                        lang === 'de' ? ['Foto', 'Stil', 'Start'] :
+                        lang === 'ru' ? ['Фото', 'Стиль', 'Старт'] :
+                        ['Photo', 'Style', 'Start']
+                      }
+                    >
+                      {/* ── Step 1: Upload ── */}
+                      <Step>
+                        <div className="pb-2">
+                          <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
+                            {lang === 'de' ? '📸 Foto hochladen' : lang === 'ru' ? '📸 Загрузите фото' : '📸 Upload photo'}
+                          </h2>
+                          <p className="text-xs text-[#6b6884] mb-4">
+                            {lang === 'de' ? 'JPEG, PNG oder WebP · max. 10 MB' : lang === 'ru' ? 'JPEG, PNG или WebP · макс. 10 МБ' : 'JPEG, PNG or WebP · max 10 MB'}
+                          </p>
+                          {!imagePreview ? (
+                            <UploadZone onFile={handleFile} t={t} />
+                          ) : (
+                            <div className="relative rounded-xl overflow-hidden border border-[#e8e5f0]">
+                              <img src={imagePreview} alt="Preview" className="w-full max-h-[40vh] object-contain bg-[#f5f4f8]" />
+                              <button onClick={() => { setImageFile(null); setImagePreview(null); }}
+                                className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full text-base flex items-center justify-center hover:bg-black/70">
+                                ×
+                              </button>
+                              <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full truncate max-w-[70%]">
+                                {imageFile?.name} · {(imageFile?.size / 1024).toFixed(0)} KB
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="p-4">
-                          <div className="text-sm font-bold text-[#0f0e17] mb-0.5 truncate">{imageFile?.name}</div>
-                          <div className="text-xs text-[#6b6884] mb-4">{platform} · {category} · {(imageFile?.size / 1024).toFixed(0)} KB</div>
-                          <button onClick={handleAnalyze} disabled={loading}
-                            className="w-full py-3.5 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98]">
-                            {t.analyzeBtn}
-                          </button>
+                      </Step>
+
+                      {/* ── Step 2: Style & Platform ── */}
+                      <Step>
+                        <div className="pb-2">
+                          <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
+                            {lang === 'de' ? '🎨 Stil wählen' : lang === 'ru' ? '🎨 Выберите стиль' : '🎨 Choose style'}
+                          </h2>
+                          <p className="text-xs text-[#6b6884] mb-4">
+                            {lang === 'de' ? 'Für welchen Bereich ist dein Post?' : lang === 'ru' ? 'Для какой ниши твой пост?' : 'What niche is your post for?'}
+                          </p>
+
+                          {/* Category grid */}
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
+                            {t.categories.map(({ label, value }) => {
+                              const icon = CATEGORY_ICONS[label] || CATEGORY_ICONS[value];
+                              return (
+                                <button key={value} onClick={() => setCategory(value)}
+                                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all active:scale-95 text-center
+                                    ${category === value
+                                      ? 'border-violet-500 bg-violet-50 text-violet-700'
+                                      : 'border-[#e8e5f0] bg-white text-[#6b6884] hover:border-violet-300'}`}>
+                                  <span className={category === value ? 'text-violet-600' : 'text-[#9896ab]'}>
+                                    {icon || '✦'}
+                                  </span>
+                                  <span className="text-[10px] font-bold leading-tight">{label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Platform tabs */}
+                          <p className="text-xs font-bold text-[#3d3a52] mb-2">
+                            {lang === 'de' ? 'Plattform' : lang === 'ru' ? 'Платформа' : 'Platform'}
+                          </p>
+                          <div className="flex bg-[#f5f4f8] border border-[#e8e5f0] rounded-xl p-1 gap-1 mb-4">
+                            {PLATFORMS.map((p) => (
+                              <button key={p} onClick={() => setPlatform(p)}
+                                className={`flex-1 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all px-1
+                                  ${platform === p ? 'bg-violet-600 text-white shadow-sm' : 'text-[#6b6884]'}`}>
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Custom purpose */}
+                          <p className="text-xs font-bold text-[#3d3a52] mb-2">
+                            {lang === 'de' ? '✏️ Eigenen Zweck hinzufügen (optional)' : lang === 'ru' ? '✏️ Добавить свою цель (необязательно)' : '✏️ Add custom purpose (optional)'}
+                          </p>
+                          <input
+                            type="text"
+                            value={customPurpose}
+                            onChange={(e) => setCustomPurpose(e.target.value)}
+                            maxLength={120}
+                            placeholder={lang === 'de' ? 'z.B. Bauunternehmen in Hamburg bewerben …' : lang === 'ru' ? 'Например, продвижение строительной компании …' : 'e.g. promote a construction company in Berlin …'}
+                            className="w-full px-3 py-2.5 border border-[#e8e5f0] rounded-xl text-sm text-[#0f0e17] placeholder-[#b0aec8] focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 bg-white"
+                          />
                         </div>
-                      </div>
-                    )}
-                  </>
-                )}
+                      </Step>
+
+                      {/* ── Step 3: Start ── */}
+                      <Step>
+                        <div className="pb-2 flex flex-col items-center text-center gap-3">
+                          {imagePreview && (
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-violet-200 shadow-sm flex-shrink-0">
+                              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          <div>
+                            <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
+                              {lang === 'de' ? '🚀 Alles bereit!' : lang === 'ru' ? '🚀 Всё готово!' : '🚀 Ready to go!'}
+                            </h2>
+                            <p className="text-xs text-[#6b6884]">
+                              {platform} · {category}
+                              {customPurpose && <><br /><span className="italic">„{customPurpose}"</span></>}
+                            </p>
+                          </div>
+                          <div className="w-full bg-[#f5f4f8] rounded-xl p-3 text-left text-xs text-[#6b6884]">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-green-500">✓</span>
+                              <span>{lang === 'de' ? 'Bild hochgeladen' : lang === 'ru' ? 'Фото загружено' : 'Photo uploaded'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-green-500">✓</span>
+                              <span>{lang === 'de' ? `Stil: ${category}` : lang === 'ru' ? `Стиль: ${category}` : `Style: ${category}`}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-green-500">✓</span>
+                              <span>{lang === 'de' ? `Plattform: ${platform}` : lang === 'ru' ? `Платформа: ${platform}` : `Platform: ${platform}`}</span>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-[#a09db8]">
+                            {lang === 'de' ? `Noch ${remaining} ${remaining === 1 ? 'Analyse' : 'Analysen'} übrig` : lang === 'ru' ? `Осталось ${remaining} анализов` : `${remaining} ${remaining === 1 ? 'analysis' : 'analyses'} left`}
+                          </p>
+                        </div>
+                      </Step>
+                    </Stepper>
+
               </>
             )}
 

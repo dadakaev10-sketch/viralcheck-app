@@ -4,9 +4,10 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const imageFile = formData.get('image');
-    const platform  = formData.get('platform') || 'Instagram Post';
-    const category  = formData.get('category') || 'Lifestyle';
-    const language  = formData.get('language') || 'de';
+    const platform      = formData.get('platform') || 'Instagram Post';
+    const category      = formData.get('category') || 'Lifestyle';
+    const language      = formData.get('language') || 'de';
+    const customPurpose = formData.get('customPurpose') || '';
 
     // Language instruction injected into the prompt
     const langInstruction = {
@@ -32,7 +33,7 @@ export async function POST(request) {
     const prompt = `You are a social media expert analyzing images for viral potential.
 ${langInstruction}
 
-Analyze this image for the platform "${platform}" in the category "${category}".
+Analyze this image for the platform "${platform}" in the category "${category}".${customPurpose ? `\nAdditional context provided by the user: "${customPurpose}". Take this into account for all recommendations, captions, hashtags, and improvements.` : ''}
 Reply ONLY with valid JSON — no markdown code fences, no explanations before or after.
 
 Required JSON format (all fields mandatory):
