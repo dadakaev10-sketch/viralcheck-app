@@ -287,16 +287,16 @@ function PWAInstallBanner({ onInstall, onDismiss, t }) {
           <div className="text-sm font-extrabold text-[#0f0e17] leading-tight">{t.pwaTitle}</div>
           <div className="text-xs text-[#6b6884] mt-0.5">{t.pwaSub}</div>
         </div>
-        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
           <button
             onClick={onInstall}
-            className="px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
+            className="px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95 w-full"
             style={{ background: 'linear-gradient(135deg, #7c3aed, #ec4899)' }}
           >{t.pwaBtn}</button>
-          <button
+          <span
             onClick={onDismiss}
-            className="text-[11px] font-medium text-[#a09db8] hover:text-[#6b6884] transition-colors"
-          >{t.pwaDismiss}</button>
+            className="text-[11px] font-medium text-[#a09db8] hover:text-[#6b6884] transition-colors cursor-pointer bg-white px-2 py-0.5 rounded w-full text-center"
+          >{t.pwaDismiss}</span>
         </div>
       </div>
     </div>
