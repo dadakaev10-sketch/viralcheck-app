@@ -537,6 +537,51 @@ function AnalysisTabs({ data, t }) {
 }
 
 // ─── Main Page ────────────────────────────────────────
+// ─── Client-side image compression ──────────────────────────
+function compressImage(file, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+
+      // Scale down large images (max 2048px on longest side)
+      const MAX_DIM = 2048;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Try decreasing quality until under maxBytes
+      let quality = 0.85;
+      const tryCompress = () => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('compress failed'));
+            if (blob.size <= maxBytes || quality <= 0.3) {
+              resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+            } else {
+              quality -= 0.1;
+              tryCompress();
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      tryCompress();
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 export default function Home() {
   const { user, authLoading, canAnalyze, remaining, credits, isPremium, signInWithGoogle, signOut, incrementUsage, saveAnalysis, uploadRegeneratedImage, updateAnalysisImage } = useAuth();
   const [lang, setLang] = useState('de');
@@ -603,16 +648,29 @@ export default function Home() {
 
   const handleDismissBanner = () => setShowInstallBanner(false);
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowed.includes(file.type)) {
       setError('❌ Nur JPEG, PNG oder WebP werden unterstützt. SVG funktioniert nicht.');
       return;
     }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
     setResult(null);
     setError(null);
+
+    // Compress if > 2MB (Vercel limit 4.5MB, keep margin)
+    const MAX_SIZE = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE && file.type !== 'image/gif') {
+      try {
+        const compressed = await compressImage(file, MAX_SIZE);
+        setImageFile(compressed);
+        setImagePreview(URL.createObjectURL(compressed));
+        return;
+      } catch {
+        // Fallback: use original
+      }
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleAnalyze = async () => {
