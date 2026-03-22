@@ -36,16 +36,26 @@ export function AuthProvider({ children }) {
             credits: 0,
             createdAt: new Date(),
           });
+        } else {
+          // Immediate fallback — set state from initial read
+          setAnalysisCount(snap.data().analysisCount || 0);
+          setCredits(snap.data().credits || 0);
         }
 
         // Live listener — updates instantly when credits change (e.g. after Telegram payment)
-        unsubSnapshot = onSnapshot(userRef, (s) => {
-          if (s.exists()) {
-            setAnalysisCount(s.data().analysisCount || 0);
-            setCredits(s.data().credits || 0);
+        unsubSnapshot = onSnapshot(userRef,
+          (s) => {
+            if (s.exists()) {
+              setAnalysisCount(s.data().analysisCount || 0);
+              setCredits(s.data().credits || 0);
+            }
+            setAuthLoading(false);
+          },
+          (err) => {
+            console.error('Firestore listener error:', err);
+            setAuthLoading(false);
           }
-          setAuthLoading(false);
-        });
+        );
       } else {
         setUser(null);
         setAnalysisCount(0);
@@ -147,6 +157,33 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Manual refresh — also triggered when user comes back from Telegram
+  const refreshCredits = async () => {
+    if (!user) return;
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        setAnalysisCount(snap.data().analysisCount || 0);
+        setCredits(snap.data().credits || 0);
+      }
+    } catch (err) {
+      console.error('refreshCredits failed:', err);
+    }
+  };
+
+  // Auto-refresh when user returns to the tab (e.g. after Telegram payment)
+  useEffect(() => {
+    const onFocus = () => { if (user) refreshCredits(); };
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') onFocus();
+    });
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [user]);
+
   const canAnalyze = credits > 0 || analysisCount < FREE_LIMIT;
   const freeRemaining = Math.max(0, FREE_LIMIT - analysisCount);
   const remaining = credits > 0 ? credits : freeRemaining;
@@ -155,7 +192,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, authLoading, analysisCount, credits, canAnalyze, remaining, isPremium,
-      signInWithGoogle, signOut: signOutUser, incrementUsage,
+      signInWithGoogle, signOut: signOutUser, incrementUsage, refreshCredits,
       saveAnalysis, uploadRegeneratedImage, updateAnalysisImage, loadAnalyses,
     }}>
       {children}
