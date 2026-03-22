@@ -91,7 +91,7 @@ export async function POST(request) {
         `🎉 <b>Zahlung erfolgreich!</b>\n\n` +
         `Du hast <b>${CREDITS_PER_PURCHASE} Analysen</b> erhalten.\n` +
         `Gehe zurück zur App und starte deine nächste Analyse! 🚀\n\n` +
-        `<a href="https://viralcheck-app.vercel.app">→ viralcheck-app.vercel.app</a>`
+        `<a href="https://viralcheck.me">→ viralcheck.me</a>`
       );
 
       return Response.json({ ok: true });
