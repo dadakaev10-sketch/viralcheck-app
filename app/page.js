@@ -657,8 +657,8 @@ export default function Home() {
     setResult(null);
     setError(null);
 
-    // Compress if > 2MB (Vercel limit 4.5MB, keep margin)
-    const MAX_SIZE = 2 * 1024 * 1024;
+    // Compress if > 4MB (Vercel limit 4.5MB)
+    const MAX_SIZE = 4 * 1024 * 1024;
     if (file.size > MAX_SIZE && file.type !== 'image/gif') {
       try {
         const compressed = await compressImage(file, MAX_SIZE);
