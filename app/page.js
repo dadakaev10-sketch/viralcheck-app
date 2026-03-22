@@ -1020,7 +1020,7 @@ export default function Home() {
                           <div>
                             <h3 className="text-base font-extrabold text-[#0f0e17] mb-0.5">
                               {lang === 'de' ? 'Alles bereit!' : lang === 'ru' ? 'Всё готово!' : 'Ready to go!'}
-                            </h2>
+                            </h3>
                             {customPurpose && (
                               <p className="text-xs text-[#6b6884] italic">„{customPurpose}"</p>
                             )}
