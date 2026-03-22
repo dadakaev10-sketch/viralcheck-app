@@ -764,6 +764,12 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{ background: '#f5f4f8', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
 
+      {/* ── SEO: Hidden accessible description for search engines & AI agents ── */}
+      <div className="sr-only" role="doc-subtitle">
+        <p>ViralCheck is an AI-powered social media analyzer for Instagram and TikTok. Upload your photo and get a viral score, optimized captions, trending hashtags, and an AI-enhanced version of your image. Available in German, English and Russian.</p>
+        <p>ViralCheck ist ein KI-gestützter Social-Media-Analyzer. Lade dein Foto hoch und erhalte einen Viral-Score, optimierte Captions, trendige Hashtags und eine KI-verbesserte Version deines Bildes.</p>
+      </div>
+
       {/* ── Topbar ── */}
       <header className="bg-white border-b border-[#e8e5f0] px-4 sm:px-8 h-14 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2 text-base font-extrabold text-[#0f0e17] tracking-tight">
@@ -922,9 +928,9 @@ export default function Home() {
                       {/* ── Step 1: Upload ── */}
                       <Step>
                         <div className="pb-2">
-                          <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
+                          <h3 className="text-base font-extrabold text-[#0f0e17] mb-1">
                             {lang === 'de' ? 'Foto hochladen' : lang === 'ru' ? 'Загрузите фото' : 'Upload photo'}
-                          </h2>
+                          </h3>
                           <p className="text-xs text-[#6b6884] mb-4">
                             {lang === 'de' ? 'JPEG, PNG oder WebP · max. 10 MB' : lang === 'ru' ? 'JPEG, PNG или WebP · макс. 10 МБ' : 'JPEG, PNG or WebP · max 10 MB'}
                           </p>
@@ -948,9 +954,9 @@ export default function Home() {
                       {/* ── Step 2: Style & Platform ── */}
                       <Step>
                         <div className="pb-2">
-                          <h2 className="text-base font-extrabold text-[#0f0e17] mb-1">
+                          <h3 className="text-base font-extrabold text-[#0f0e17] mb-1">
                             {lang === 'de' ? 'Stil wählen' : lang === 'ru' ? 'Выберите стиль' : 'Choose style'}
-                          </h2>
+                          </h3>
                           <p className="text-xs text-[#6b6884] mb-4">
                             {lang === 'de' ? 'Für welchen Bereich ist dein Post?' : lang === 'ru' ? 'Для какой ниши твой пост?' : 'What niche is your post for?'}
                           </p>
@@ -1012,7 +1018,7 @@ export default function Home() {
                             </div>
                           )}
                           <div>
-                            <h2 className="text-base font-extrabold text-[#0f0e17] mb-0.5">
+                            <h3 className="text-base font-extrabold text-[#0f0e17] mb-0.5">
                               {lang === 'de' ? 'Alles bereit!' : lang === 'ru' ? 'Всё готово!' : 'Ready to go!'}
                             </h2>
                             {customPurpose && (
@@ -1165,6 +1171,18 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ── SEO Footer ── */}
+      <footer className="text-center py-6 text-[11px] text-[#a09db8]">
+        <nav aria-label="Footer" className="flex items-center justify-center gap-3 mb-2">
+          <a href="/privacy" className="hover:text-violet-600 transition-colors">
+            {lang === 'de' ? 'Datenschutz' : lang === 'ru' ? 'Конфиденциальность' : 'Privacy'}
+          </a>
+          <span>·</span>
+          <a href="https://t.me/ViralCheckApp_bot" target="_blank" rel="noopener noreferrer" className="hover:text-violet-600 transition-colors">Telegram</a>
+        </nav>
+        <p>&copy; {new Date().getFullYear()} ViralCheck. All rights reserved.</p>
+      </footer>
     </div>
   );
 }

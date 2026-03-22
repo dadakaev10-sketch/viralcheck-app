@@ -1,0 +1,32 @@
+# ViralCheck – AI Social Media Analyzer
+
+> ViralCheck is a web application that uses AI to analyze social media images for their viral potential. It provides a viral score, optimized captions, relevant hashtags, and AI-enhanced image regeneration.
+
+## What ViralCheck Does
+- Analyzes photos for viral potential on Instagram and TikTok
+- Generates optimized captions in the user's language
+- Suggests trending and relevant hashtags
+- Creates AI-enhanced versions of uploaded photos
+- Supports German, English, and Russian interfaces
+
+## Key Features
+- **Viral Score**: AI rates your image's viral potential from 0-100
+- **Caption Generator**: Get platform-optimized captions
+- **Hashtag Suggestions**: Trending hashtags for your niche
+- **Image Enhancement**: AI-regenerated version with improved lighting and mood
+- **Before/After Comparison**: Visual slider comparing original and enhanced images
+- **Multi-Platform**: Optimized for Instagram Posts, Stories, TikTok, and Reels
+- **Categories**: Food, Fashion, Lifestyle, Fitness, Travel, Business, Luxury
+
+## How It Works
+1. Upload a photo (JPEG, PNG, WebP)
+2. Select your content category and target platform
+3. AI analyzes the image and returns detailed results
+
+## Pricing
+- 3 free analyses after sign-up
+- 20 additional analyses for 100 Telegram Stars (~1 EUR)
+
+## Links
+- Website: https://viralcheck.me
+- Telegram Bot: https://t.me/ViralCheckApp_bot
