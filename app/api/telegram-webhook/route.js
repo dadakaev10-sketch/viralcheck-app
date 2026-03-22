@@ -1,10 +1,17 @@
-import { doc, updateDoc, increment, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CREDITS_PER_PURCHASE = 20;
 
-// Answer Telegram pre_checkout_query so payment can proceed
+function getAdminDb() {
+  if (!getApps().length) {
+    const key = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
+    initializeApp({ credential: cert(key) });
+  }
+  return getFirestore();
+}
+
 async function answerPreCheckout(queryId, ok, errorMessage) {
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerPreCheckoutQuery`, {
     method: 'POST',
@@ -13,7 +20,6 @@ async function answerPreCheckout(queryId, ok, errorMessage) {
   });
 }
 
-// Send a message to a Telegram chat
 async function sendMessage(chatId, text) {
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
@@ -32,7 +38,6 @@ export async function POST(request) {
       const chatId = body.message.chat.id;
 
       if (parts.length < 2) {
-        // No UID → just greet
         await sendMessage(chatId,
           '👋 <b>Willkommen bei ViralCheck!</b>\n\nÖffne die App und klicke auf "Upgrade", um Credits zu kaufen.'
         );
@@ -41,7 +46,6 @@ export async function POST(request) {
 
       const uid = parts[1];
 
-      // Send payment invoice (Telegram Stars)
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendInvoice`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,17 +53,17 @@ export async function POST(request) {
           chat_id: chatId,
           title: '✨ ViralCheck – 20 Analysen',
           description: `Kaufe 20 weitere Analysen für ViralCheck. Sofort freigeschaltet!`,
-          payload: uid, // Firebase UID als payload → verknüpft Zahlung mit User
-          currency: 'XTR', // Telegram Stars
-          prices: [{ label: '20 Analysen', amount: 100 }], // 100 Stars
-          provider_token: '', // Leer bei Stars
+          payload: uid,
+          currency: 'XTR',
+          prices: [{ label: '20 Analysen', amount: 100 }],
+          provider_token: '',
         }),
       });
 
       return Response.json({ ok: true });
     }
 
-    // ── Pre-checkout query (Telegram fragt: darf Zahlung durch?) ───
+    // ── Pre-checkout query ──────────────────────────────────────────
     if (body.pre_checkout_query) {
       await answerPreCheckout(body.pre_checkout_query.id, true);
       return Response.json({ ok: true });
@@ -68,7 +72,7 @@ export async function POST(request) {
     // ── Successful payment ─────────────────────────────────────────
     if (body.message?.successful_payment) {
       const payment = body.message.successful_payment;
-      const uid = payment.invoice_payload; // Firebase UID
+      const uid = payment.invoice_payload;
       const chatId = body.message.chat.id;
 
       if (!uid) {
@@ -76,15 +80,14 @@ export async function POST(request) {
         return Response.json({ ok: true });
       }
 
-      // Add credits to Firestore
-      const ref = doc(db, 'users', uid);
-      const snap = await getDoc(ref);
+      const db = getAdminDb();
+      const ref = db.doc(`users/${uid}`);
+      const snap = await ref.get();
 
-      if (snap.exists()) {
-        await updateDoc(ref, { credits: increment(CREDITS_PER_PURCHASE) });
+      if (snap.exists) {
+        await ref.update({ credits: FieldValue.increment(CREDITS_PER_PURCHASE) });
       } else {
-        // Fallback: create user doc
-        await setDoc(ref, { credits: CREDITS_PER_PURCHASE, analysisCount: 0, createdAt: new Date() });
+        await ref.set({ credits: CREDITS_PER_PURCHASE, analysisCount: 0, createdAt: new Date() });
       }
 
       await sendMessage(chatId,
