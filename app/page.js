@@ -635,8 +635,10 @@ export default function Home() {
       fd.append('language', lang);
       if (customPurpose) fd.append('customPurpose', customPurpose);
       const res = await fetch('/api/analyze', { method: 'POST', body: fd });
-      const data = await res.json();
       stepTimers.forEach(clearTimeout);
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(text.slice(0, 120) || 'Server-Fehler'); }
       if (!res.ok) throw new Error(data.error || 'Analyse fehlgeschlagen');
       setResult(data);
       await incrementUsage();
