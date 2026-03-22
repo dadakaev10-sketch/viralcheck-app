@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, onSnapshot } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '../lib/firebase';
 
@@ -16,16 +16,19 @@ export function AuthProvider({ children }) {
   const [credits, setCredits] = useState(0);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+    let unsubSnapshot = null;
+
+    const unsubAuth = onAuthStateChanged(auth, async (fbUser) => {
+      if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+
       if (fbUser) {
         setUser(fbUser);
-        const ref = doc(db, 'users', fbUser.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          setAnalysisCount(snap.data().analysisCount || 0);
-          setCredits(snap.data().credits || 0);
-        } else {
-          await setDoc(ref, {
+        const userRef = doc(db, 'users', fbUser.uid);
+
+        // Create doc if it doesn't exist yet
+        const snap = await getDoc(userRef);
+        if (!snap.exists()) {
+          await setDoc(userRef, {
             email: fbUser.email,
             displayName: fbUser.displayName,
             photoURL: fbUser.photoURL,
@@ -33,17 +36,28 @@ export function AuthProvider({ children }) {
             credits: 0,
             createdAt: new Date(),
           });
-          setAnalysisCount(0);
-          setCredits(0);
         }
+
+        // Live listener — updates instantly when credits change (e.g. after Telegram payment)
+        unsubSnapshot = onSnapshot(userRef, (s) => {
+          if (s.exists()) {
+            setAnalysisCount(s.data().analysisCount || 0);
+            setCredits(s.data().credits || 0);
+          }
+          setAuthLoading(false);
+        });
       } else {
         setUser(null);
         setAnalysisCount(0);
         setCredits(0);
+        setAuthLoading(false);
       }
-      setAuthLoading(false);
     });
-    return unsub;
+
+    return () => {
+      unsubAuth();
+      if (unsubSnapshot) unsubSnapshot();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
