@@ -44,6 +44,11 @@ export async function POST(request) {
         lighting: 'bright, energetic lighting highlighting muscle definition',
         atmosphere: 'athletic, confident, strong, determined',
         enhancement: 'sharp focus, dynamic lighting, enhanced definition'
+      },
+      'CV': {
+        lighting: 'clean, even studio lighting, soft and professional',
+        atmosphere: 'professional, approachable, competent, trustworthy',
+        enhancement: 'clean neutral background, sharp face focus, professional headshot look, even skin tones, subtle color correction'
       }
     };
 

@@ -19,6 +19,7 @@ export const translations = {
       { label: 'Travel',     value: 'Travel' },
       { label: 'Business',   value: 'Business' },
       { label: 'Luxury',     value: 'Luxury' },
+      { label: 'Lebenslauf', value: 'CV' },
     ],
 
     // Upload zone
@@ -145,6 +146,7 @@ export const translations = {
       { label: 'Travel',     value: 'Travel' },
       { label: 'Business',   value: 'Business' },
       { label: 'Luxury',     value: 'Luxury' },
+      { label: 'CV',         value: 'CV' },
     ],
 
     uploadTitle: 'Select image',
@@ -257,6 +259,7 @@ export const translations = {
       { label: 'Путешествия',  value: 'Travel' },
       { label: 'Бизнес',       value: 'Business' },
       { label: 'Люкс',         value: 'Luxury' },
+      { label: 'Резюме',       value: 'CV' },
     ],
 
     uploadTitle: 'Выберите изображение',
