@@ -735,7 +735,9 @@ export default function Home() {
           customPurpose,
         }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(text.slice(0, 200) || 'Regeneration fehlgeschlagen'); }
       if (!res.ok) throw new Error(data.error || 'Regeneration fehlgeschlagen');
       setRegeneratedImage(data.image);
       // Upload to Firebase Storage & update Firestore
