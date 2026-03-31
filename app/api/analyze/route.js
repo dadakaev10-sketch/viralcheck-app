@@ -85,7 +85,7 @@ Required JSON format (all fields mandatory):
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'grok-4-1-fast-reasoning',
+        model: 'grok-4-1-fast-non-reasoning',
         messages: [
           {
             role: 'user',
@@ -100,8 +100,10 @@ Required JSON format (all fields mandatory):
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'X.AI API error');
+      const errText = await response.text();
+      let errMsg = 'X.AI API error';
+      try { errMsg = JSON.parse(errText).error?.message || errText; } catch { errMsg = errText; }
+      throw new Error(errMsg);
     }
 
     const data = await response.json();
