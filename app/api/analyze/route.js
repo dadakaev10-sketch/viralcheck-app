@@ -109,11 +109,12 @@ Required JSON format (all fields mandatory):
     const data = await response.json();
     const rawText = data.choices[0].message.content.trim();
 
-    // Strip markdown code fences if model adds them anyway
+    // Strip markdown code fences and fix common JSON issues from LLMs
     const cleaned = rawText
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/i, '')
       .replace(/\s*```$/i, '')
+      .replace(/,\s*([}\]])/g, '$1') // fix trailing commas before } or ]
       .trim();
 
     const analysis = JSON.parse(cleaned);
