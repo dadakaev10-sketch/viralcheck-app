@@ -8,7 +8,7 @@ export async function POST(request) {
       return Response.json({ error: 'Keine Verbesserungsvorschläge gefunden.' }, { status: 400 });
     }
 
-    const apiKey = process.env.XAI_IMAGE_API_KEY || process.env.XAI_API_KEY;
+    const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) {
       return Response.json({ error: 'XAI_API_KEY fehlt in .env.local' }, { status: 500 });
     }
