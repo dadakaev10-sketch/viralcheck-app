@@ -740,14 +740,15 @@ export default function Home() {
       try { data = JSON.parse(text); } catch { throw new Error(text.slice(0, 200) || 'Regeneration fehlgeschlagen'); }
       if (!res.ok) throw new Error(data.error || 'Regeneration fehlgeschlagen');
       setRegeneratedImage(data.image);
-      // Upload to Firebase Storage & update Firestore
+      setRegenerating(false);
+      // Upload to Firebase Storage in background (don't block UI)
       if (currentAnalysisId && data.image) {
-        const url = await uploadRegeneratedImage(data.image, currentAnalysisId);
-        if (url) await updateAnalysisImage(currentAnalysisId, url);
+        uploadRegeneratedImage(data.image, currentAnalysisId)
+          .then(url => { if (url) updateAnalysisImage(currentAnalysisId, url); })
+          .catch(() => {});
       }
     } catch (err) {
       setError(err.message);
-    } finally {
       setRegenerating(false);
     }
   };
