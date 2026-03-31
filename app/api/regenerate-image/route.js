@@ -94,8 +94,11 @@ This must look like the SAME photo, just professionally enhanced for ${category}
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'X.AI Image Generation error');
+      const errText = await response.text();
+      let errMsg = 'X.AI Image Generation error';
+      try { errMsg = JSON.parse(errText).error?.message || errText; } catch { errMsg = errText; }
+      console.error('X.AI image API error:', response.status, errMsg);
+      throw new Error(errMsg);
     }
 
     const data = await response.json();
